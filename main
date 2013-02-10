@@ -62,6 +62,11 @@ def DrawDials(tickbegin, tickend):
     del tick
     return ret
 
+def getImagesFromGif(filename):
+    im = Image.open(filename)
+    return [frame.copy() for frame in ImageSequence.Iterator(im)]
+
 #main
 
-writeGif(filename, DrawDials(Tick(0, 0, 0), Tick(15, 5, 0)), duration = 0.000000001, dither = 1)
+#writeGif(filename, DrawDials(Tick(0, 0, 0), Tick(15, 5, 0)), duration = 0.000000001, dither = 1)
+
