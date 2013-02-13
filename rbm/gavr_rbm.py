@@ -1,5 +1,3 @@
-from numpy.oldnumeric.random_array import random_integers
-
 __author__ = 'gavr'
 
 import time
@@ -8,13 +6,16 @@ import StringIO
 
 import numpy
 from math import sqrt
-
 import theano
 import theano.tensor as T
-import re
-import os
+
+from numpy.oldnumeric.random_array import random_integers
 
 from theano.tensor.shared_randomstreams import RandomStreams
+
+import re
+import os
+import sys
 
 class RBM:
     def __init__(self, hidden, visible, rnd, theanoRnd, W = None, hBias = None, vBias = None):
@@ -153,20 +154,41 @@ def convertVectorToImage(appearance, vector):
     im.putdata(vector)
     return im
 
-def Learn(rbm, data, countStep, learningRate, gibbsStep, func=None, zipManager=None):
+def Learn(rbm, data, countStep, learningRate, gibbsStep, func=None, zipper=None, appereance=None):
     # TODO tic-toc time;
     # TODO work with ZipManager
     # TODO test ZipManager
     if func is None:
-        for idx in range(0, countStep): rbm.grad_step(len(data), numpy.asarray(learningRate, dtype='float32'), gibbsStep, data);
+        func = lambda index, data: data
+    if zipper is None:
+        Update = lambda index: 1
     else:
-        for idx in range(0, countStep): d1 = func(idx, data); rbm.grad_step(len(d1), numpy.asarray(learningRate, dtype='float32'), gibbsStep, d1);
+        def myUpdate(index):
+            image = convertVectorToImage(appereance, rbm.gibbsFromRnd(gibbsStep))
+            zipper.addImage(image, '', gibbsStep, index)
+        Update = myUpdate
+    startTime = time.clock()
+    time = 0
+    for idx in range(0, countStep):
+        d1 = func(idx, data);
+        rbm.grad_step(len(d1), numpy.asarray(learningRate, dtype='float32'), gibbsStep, d1);
+        # clock time
+        endTime = time.clock(); time += endTime - startTime; startTime = endTime
+        # output information
+        print idx, ' / ' ,countStep
+        Update()
+    if zipper is not None:
+        strIO = StringIO.StringIO()
+        rbm.saveTo(strIO)
+        zipper.addTextFileFromString('data.txt', strIO)
+        strIO.close()
+    return time
     
-#TODO make RBM.learn
+#TODO test rbm Learn
+#TODO loadRbmFromZipManager
 
 '''
 Example
-
 '''
 
 import PIL.Image
@@ -183,29 +205,25 @@ def generatorImage(size):
 
 size = 5
 # generate data
-data = [convertImageToVector(generatorImage(size)) for i in range(0, 100)]
+#data = [convertImageToVector(generatorImage(size)) for i in range(0, 100)]
+
 # create rbm
 #   first param is count hidden
 #   second param is count visible
-rbm = createSimpleRBM(10, size * size)
-res = []
-res1 = []
-for idx in range(0, 10):
-    print idx
-    print rbm.grad_step(len(data), numpy.asarray(0.01, dtype='float32'), 10, data)
-   #  res += [convertVectorToImage(generatorImage(si), rbm.gibbsFromRnd(10))]
-   # res1 += [convertVectorToImage(generatorImage(40), rbm.gibbsFromRnd(2))]
-#for a in res:
- #   a.show()
-    #b.show()
+#rbm = createSimpleRBM(10, size * size)
 
-#convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 40)).show()
-#convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 2)).show()
-#convertVectorToImage(generatorImage(size), rbm.gibbs(data[10], 10)).show()
-#convertVectorToImage(generatorImage(size), rbm.gibbs(data[10], 2)).show()
+# importing ZipManager
+path = os.getcwd().split("\\"); del path[-1]; path = "\\".join(path); sys.path.insert(0, path);
+import zipManager
 
-strio = StringIO.StringIO()
-rbm.saveTo(strio)
-print len(strio.getvalue().split('\n'))
-#print strio.
-rbm1 = open(strio)
+zm = zipManager.ZipManager('1.zip')
+def fff(x):
+    if x.filename == 'data.txt':
+        str = zm.zf.read('data.txt')
+        print str
+        zm.zf.read
+        zm.zf.extract('data.txt')
+        zm.addTextFileFromString('data.old.txt', str)
+        zm.zf.
+
+map(fff, zm.zf.filelist)
