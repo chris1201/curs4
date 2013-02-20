@@ -106,29 +106,32 @@ class RBM:
         # gibbs_matrix_format depends from data, countGibbsSteps
         gibbs_matrix_format, updates_gibbs_matrix = template(data)
         gibbs_matrix_format = gibbs_matrix_format[-1]
-        # cost depends from data, countGibbsSteps
-        cost = T.mean(freeEnergy_format(data)) - T.mean(freeEnergy_format(gibbs_matrix_format))
-        gradBlock = [W, vBias, hBias]
-        gradient = theano.grad(cost, gradBlock, consider_constant=[data, gibbs_matrix_format])
-        updates = updates_gibbs_matrix
-        for value, grad in zip(gradBlock, gradient):
-            updates[value] = value - learningRate * grad
-        self.grad_step = theano.function([data, learningRate, countGibbsSteps], cost, updates=updates)
         # make gibbs-step from random
         gibbsFromRnd_format, updates_gibbs_rnd = template(generateRandomVisibles_format)
+        gibbsFromRnd_format_matrix = gibbsFromRnd_format[-1]
         gibbsFromRnd_format = gibbsFromRnd_format[-1]
         # save this function
         self.gibbsFromRnd = theano.function(inputs=[countGibbsSteps], outputs=gibbsFromRnd_format, updates=updates_gibbs_rnd)
+        # cost depends from data, countGibbsSteps
+        cost = T.mean(freeEnergy_format(data)) - (freeEnergy_format_vector(gibbsFromRnd_format_matrix))
+        gradBlock = [W, vBias, hBias]
+        gradient = theano.grad(cost, gradBlock, consider_constant=[data, gibbsFromRnd_format_matrix])
+        updates = updates_gibbs_rnd
+        for value, grad in zip(gradBlock, gradient):
+            updates[value] = value - learningRate * grad
+        self.grad_step = theano.function([data, learningRate, countGibbsSteps], cost, updates=updates)
 
     def saveTo(self):
         strIo = StringIO.StringIO()
-        func = lambda theano_func: re.sub('array\(|\)|\n|\t|\[|\][^,]', '',repr(theano_func()))
+        convertingVector = lambda x: '[ '+', '.join(map(str, x)) + '] '
+        convertingMatrix = lambda y: '[' + '], '.join(map(convertingVector, y)) + '] '
+        func = lambda str: re.sub('array\(|\)|\n|\t|\[|\][^,]', '', str)
         fget = lambda var: theano.function([], var)
         strIo.write(repr(self.visible) + "\n")
         strIo.write(repr(self.hidden) + "\n")
-        strIo.write(func(fget(self.hBias)) + "\n")
-        strIo.write(func(fget(self.vBias)) + "\n")
-        strIo.write(func(fget(self.W)) + "\n")
+        strIo.write(func(convertingVector(fget(self.hBias)())) + "\n")
+        strIo.write(func(convertingVector(fget(self.vBias)())) + "\n")
+        strIo.write(func(convertingMatrix(fget(self.W)())) + "\n")
         return strIo
 
 def createSimpleRBM(hidden, visible):
@@ -153,12 +156,15 @@ def saveData(strio):
 # readData from data.txt
 def getStringData():
     file = open('data.txt', 'r')
+    s = StringIO.StringIO()
     output = file.readlines()
+    s.writelines(output)
     file.close()
-    return output
+    return s.getvalue()
 
 # create RBM from string-text
 def openRBM(strio):
+    print strio
     array = strio.split('\n')
     parse_vector = lambda str: map(float, str.split(','))
     parse_matrix = lambda str: [parse_vector(substr) for substr in str.split('],')]
@@ -182,7 +188,7 @@ def generatorImage(size):
     image.putpalette([255, 255, 255, 0, 0, 0])
     draw = PIL.ImageDraw.Draw(image)
     f = lambda x, y: random_integers(y, minimum=x)
-    draw.line((f(size / 2, size), f(size / 2, size), f(1, size / 2), f(1, size / 2)), fill = 1)
+    draw.line((f(1, size/2), f(1, size/2), f(size/2, size), f(size/2, size)), fill = 1)
     return image
 
 def generatorWrongImage(size):
@@ -195,20 +201,16 @@ def generatorWrongImage(size):
 
 size = 20
 # generate Data
-data = [convertImageToVector(generatorImage(size)) for i in range(0, 100)]
-rbm = createSimpleRBM(200, size * size)
+datasize = 100
+data = [convertImageToVector(generatorImage(size)) for i in range(0, datasize)]
+rbm = createSimpleRBM(100, size * size)
+#saveData(rbm.saveTo().getvalue())
+#rbm = openRBM(getStringData())
 print 'start train'
 
-for idx in range(0, 100):
-    print idx
-    d1 = [data[idx]]
-    print rbm.grad_step(d1, numpy.asarray(0.01, dtype='float32'), 50)
-
-print 'train 2.0'
-
-for idx in range(0, 40):
-    print idx
-    print rbm.grad_step(data, numpy.asarray(0.001, dtype='float32'), 30)
+for idx in range(0, 200):
+   # for inneridx in range(0, datasize):
+    print idx, rbm.grad_step(data, numpy.asarray(0.01, dtype='float32'), 3)
 
 print 'control train data'
 
@@ -217,7 +219,7 @@ for obj in data:
 
 print 'control train data'
 
-data = [convertImageToVector(generatorImage(size)) for i in range(0, 100)]
+data = [convertImageToVector(generatorImage(size)) for i in range(0, 10)]
 
 for obj in data:
     print rbm.freeEnergy(obj)
@@ -250,4 +252,11 @@ convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(genera
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 10)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 20)).show()
 
+convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(2)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(5)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(10)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(20)).show()
+
+
 saveData(rbm.saveTo().getvalue())
+print 'saving has been made'

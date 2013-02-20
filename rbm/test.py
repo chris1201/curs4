@@ -18,15 +18,18 @@ import os
 import sys
 
 
-a = theano.shared(1)
-values,updates = theano.scan( lambda : [a, {a:a+1}], n_steps = 10 )
-print updates
-print values
-b = a+1
-c = updates[a] + 1
-f = theano.function([], [values, b,c], updates = updates)
+q = T.tensor3()
 
-print b
-print c
-print a.value
-print f()
+print q
+z = numpy.asarray([[[1, 2, -1], [3, 4, -1]], [[5, 6, -1], [7, 8, -1]]])
+print z
+q.dimshuffle(0, 2, 1)
+#f1, upd = theano.scan(lambda a: T.dot(a, a.T), sequences=q)
+#f2 = T.sum(f1, axis=(1, 2))
+#f2 = T.addbroadcast(f2)
+#f3 = theano.function([q], [f2, q[0], (f2 + q[0])])
+a, b, c = q.shape
+eee = T.zeros((a, b))
+f4 = theano.function([q], eee)
+#print f3(z)
+print f4(z)
