@@ -1,22 +1,15 @@
 __author__ = 'gavr'
 
-import time
-import PIL.Image
-import PIL.ImageDraw
-import PIL.ImagePalette
-# save
+import utils
 import StringIO
 
 import numpy
 from math import sqrt
 import theano
 import theano.tensor as T
-from numpy.oldnumeric.random_array import random_integers
 from theano.tensor.shared_randomstreams import RandomStreams
 
 import re
-import os
-import sys
 
 """
 freeEnergy(visibleSample) - calculate freeEnergy for sample of visible energy
@@ -139,29 +132,6 @@ def createSimpleRBM(hidden, visible):
     theanoRng = RandomStreams(numpyRng.randint(2 ** 30))
     return RBM(hidden, visible, numpyRng, theanoRng)
 
-def convertImageToVector(image):
-    return numpy.asarray(list(image.getdata()))
-
-def convertVectorToImage(appearance, vector):
-    im = appearance.copy()
-    im.putdata(vector)
-    return im
-
-# save Data
-def saveData(strio):
-    file = open('data.txt', 'w')
-    file.write(strio)
-    file.close()
-
-# readData from data.txt
-def getStringData():
-    file = open('data.txt', 'r')
-    s = StringIO.StringIO()
-    output = file.readlines()
-    s.writelines(output)
-    file.close()
-    return s.getvalue()
-
 # create RBM from string-text
 def openRBM(strio):
     print strio
@@ -176,87 +146,4 @@ def openRBM(strio):
     theanoRng = RandomStreams(numpyRng.randint(2 ** 30))
     return RBM(int(array[1]), int(array[0]), numpyRng, theanoRng, W, hBias, vBias)
 
-"""
 
-    Example
-    
-"""
-
-
-def generatorImage(size):
-    image = PIL.Image.new(mode = "P", size = (size, size))
-    image.putpalette([255, 255, 255, 0, 0, 0])
-    draw = PIL.ImageDraw.Draw(image)
-    f = lambda x, y: random_integers(y, minimum=x)
-    draw.line((f(1, size/2), f(1, size/2), f(size/2, size), f(size/2, size)), fill = 1)
-    return image
-
-def generatorWrongImage(size):
-    image = PIL.Image.new(mode = "P", size = (size, size))
-    image.putpalette([255, 255, 255, 0, 0, 0])
-    draw = PIL.ImageDraw.Draw(image)
-    f = lambda x, y: random_integers(y, minimum=x)
-    draw.line((f(size / 2, size), f(1, size / 2), f(1, size / 2), f(size / 2, size)), fill = 1)
-    return image
-
-size = 20
-# generate Data
-datasize = 100
-data = [convertImageToVector(generatorImage(size)) for i in range(0, datasize)]
-rbm = createSimpleRBM(100, size * size)
-#saveData(rbm.saveTo().getvalue())
-#rbm = openRBM(getStringData())
-print 'start train'
-
-for idx in range(0, 200):
-   # for inneridx in range(0, datasize):
-    print idx, rbm.grad_step(data, numpy.asarray(0.01, dtype='float32'), 3)
-
-print 'control train data'
-
-for obj in data:
-    print rbm.freeEnergy(obj)
-
-print 'control train data'
-
-data = [convertImageToVector(generatorImage(size)) for i in range(0, 10)]
-
-for obj in data:
-    print rbm.freeEnergy(obj)
-
-print 'randomInfo'
-
-for idx in range(0, 5):
-    x = rbm.generateVisibles()
-    print rbm.freeEnergy(x)
-    x1 = rbm.gibbs(x, 1)
-    print rbm.freeEnergy(x1)
-    x2 = rbm.gibbs(x, 10)
-    print rbm.freeEnergy(x2)
-
-print 'WringImage'
-
-for idx in range(0, 5):
-    x = generatorWrongImage(size)
-    x = convertImageToVector(x)
-    print rbm.freeEnergy(x)
-    x1 = rbm.gibbs(x, 1)
-    print rbm.freeEnergy(x1)
-    x2 = rbm.gibbs(x, 10)
-    print rbm.freeEnergy(x2)
-
-generatorImage(size).show()
-convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 1)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 2)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 5)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 10)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 20)).show()
-
-convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(2)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(5)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(10)).show()
-convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(20)).show()
-
-
-saveData(rbm.saveTo().getvalue())
-print 'saving has been made'

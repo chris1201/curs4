@@ -1,4 +1,5 @@
 from re import template
+import re
 
 __author__ = 'gavr'
 import time
@@ -174,14 +175,29 @@ class RTRBM:
         for u, v in zip(block, alls[1:]):
             upds[u] = u - learningRate * v
         self.grad_step_rnd = theano.function([data, countGibbsSteps, learningRate], alls[0], updates=upds)
-        print self.grad_step_rnd
-        
+
         alls, upds = calc_grad_Energy_For_Input_Objects_By_Data(shuffleData)
         block = [W1, W2, hBias, vBias, W]
         for u, v in zip(block, alls[1:]):
             upds[u] = u - learningRate * v
         self.grad_step = theano.function([data, countGibbsSteps, learningRate], alls[0], updates=upds)
-        print self.grad_step
+
+    def save(self):
+        strIo = StringIO.StringIO()
+        convertingVector = lambda x: '[ '+', '.join(map(str, x)) + '] '
+        convertingMatrix = lambda y: '[' + '], '.join(map(convertingVector, y)) + '] '
+        func = lambda str: re.sub('array\(|\)|\n|\t|\[|\][^,]', '', str)
+        fget = lambda var: theano.function([], var)
+        strIo.write(repr(self.visible) + "\n")
+        strIo.write(repr(self.hidden) + "\n")
+        strIo.write(func(convertingVector(fget(self.hBias)())) + "\n")
+        strIo.write(func(convertingVector(fget(self.vBias)())) + "\n")
+        strIo.write(func(convertingMatrix(fget(self.W)())) + "\n")
+        strIo.write(func(convertingMatrix(fget(self.W1)())) + "\n")
+        strIo.write(func(convertingMatrix(fget(self.W2)())) + "\n")
+        return strIo
+
+
 # TODO save RTRBM
 # TODO test RTRBM
 # TODO Apply RTRBM for clocks.

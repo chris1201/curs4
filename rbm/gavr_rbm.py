@@ -114,8 +114,6 @@ class RBM:
         # save function
         self.grad_step = theano.function([sizeOfBlockForLearn, learningRate, countGibbsSteps, data], egrad, updates=updates)
 
-#        TODO: return not all gradient, only information about max, min, ExpectValue by W, hBias, vBias
-
     def saveTo(self, strIo):
         if isinstance(strIo, StringIO.StringIO):
             func = lambda theano_func: re.sub('array\(|\)|\n|\t|\[|\][^,]', '',repr(theano_func()))
@@ -155,9 +153,6 @@ def convertVectorToImage(appearance, vector):
     return im
 
 def Learn(rbm, data, countStep, learningRate, gibbsStep, func=None, zipper=None, appereance=None):
-    # TODO tic-toc time;
-    # TODO work with ZipManager
-    # TODO test ZipManager
     if func is None:
         func = lambda index, data: data
     if zipper is None:
@@ -184,9 +179,6 @@ def Learn(rbm, data, countStep, learningRate, gibbsStep, func=None, zipper=None,
         strIO.close()
     return time
     
-#TODO test rbm Learn
-#TODO loadRbmFromZipManager
-
 '''
 Example
 '''
