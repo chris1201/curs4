@@ -37,9 +37,9 @@ rbm = createSimpleRBM(100, size * size)
 #rbm = openRBM(getStringData())
 print 'start train'
 
-for idx in range(0, 80):
-    for index in range(0, 20):
-        print idx, rbm.grad_step(data[index * 100: (index+1) * 100 - 1], numpy.asarray(0.01, dtype='float32'), 20)
+for idx in range(0, 160):
+    for index in range(0, 200):
+        print idx, index, rbm.grad_step(data[index * 10: (index+1) * 10 - 1], numpy.asarray(0.001, dtype='float32'), 10)
 
 print 'control train data'
 
@@ -77,11 +77,15 @@ for idx in range(0, 5):
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 1)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 5)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 10)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 10)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 10)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 20)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbs(convertImageToVector(generatorImage(size)), 30)).show()
-
+print "random images"
 convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(1)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(5)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(10)).show()
+convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(10)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(10)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(20)).show()
 convertVectorToImage(generatorImage(size), rbm.gibbsFromRnd(30)).show()

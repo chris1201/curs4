@@ -17,4 +17,18 @@ import re
 import os
 import sys
 
-import rbm
+from PIL import Image
+
+im = Image.new(mode='F', size = (40, 40))
+data = im.getdata()
+data = [value for value in data]
+
+data[800] = 0.1
+data[900] = 0.5
+data[1000] = 1
+
+data = map(lambda x: x * 256, data);
+im.putdata(data)
+print im.size
+print im.mode
+im.show()
