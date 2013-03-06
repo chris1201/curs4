@@ -227,7 +227,7 @@ class RTRBM:
 
 # TODO save RTRBM
 # TODO test RTRBM
-# TODO Apply RTRBM for clocks.
+# TODO Apply RTRBM for clocks.py.
 
 def createSimpleRTRBM(hidden, visible):
     numpyRng = numpy.random.RandomState(1234)

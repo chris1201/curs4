@@ -74,7 +74,7 @@ appereance = generatorAnimImag(size)
 #data
 data = [convertAnimToDataBlock(generatorAnimLine(size, idx, countFrames)) for idx in range(0, 10 - countFrames)]
 
-mode = 2
+mode = 1
 if mode == 1:
     #new_rbm
     bm = rtrbm.createSimpleRTRBM(200, size * size)
@@ -87,33 +87,4 @@ else:
     #load_rbm
     bm = rtrbm.openRTRBM(utils.getStringData())
 
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingFromRnd(countFrames, 6))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingFromRnd(countFrames, 6))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingFromRnd(countFrames, 6))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingFromRnd(countFrames, 7))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSampling(data[0], 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSampling(data[1], 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSampling(data[2], 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSampling(data[3], 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSampling(data[4], 5))).show()
-z = bm.gibbsSamplingWithOutCoin(data[0], 5)
-z = map(lambda x: map(lambda y: round(256 * y), x), z);
-print 'part1'
-for q in z:
-    print q
-print 'part2'
-z0 = bm.gibbsSamplingPredictionWithOutCoin(data[2], 4, 5)
-z = map(lambda x: map(lambda y: round(256 * y), x), z0);
-for q in z:
-    print q
-temp = utils.convertProbabilityMatrixToImages(appereance, z0)
-temp[0].show()
 makeAnimImageFromImages(temp).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingPrediction(data[0], 4, 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingWithOutCoin(data[0], 1))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingPredictionWithOutCoin(data[0], 4, 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingPredictionWithOutCoin(data[1], 4, 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingPredictionWithOutCoin(data[2], 4, 5))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingPrediction(data[0], 4, 6))).show()
-#makeAnimImageFromImages(utils.convertMatrixToImages(appereance, bm.gibbsSamplingPrediction(data[0], 4, 7))).show()
-#res = bm.gibbsSamplingPrediction(data[0], 4, 5)
