@@ -38,4 +38,19 @@ def getStringData():
     file.close()
     return s.getvalue()
 
+def makeAnimImageFromImages(data):
+    count = len(data)
+    size0 = data[0].size
+    size = (size0[0], count * size0[1])
+    imag = Image.new(size=size, mode=data[0].mode)
+    if imag.mode == 'P':
+        imag.putpalette(data[0].getpalette())
+    for idx in range(0, count):
+        imag.paste(data[idx], (0, idx * size0[1], size0[1], (idx + 1) * size0[1]))
+    return imag
+
+# todo image concatinate by horizontal, by vertical
+# todo plot full image(ala mesh)
+# 
+
   

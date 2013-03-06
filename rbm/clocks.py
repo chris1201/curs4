@@ -35,14 +35,15 @@ class Tick:
         else:
             return False
 
-def div(turple, value):
-#    return (x / value for x in turple)
-    return (turple[0] / value, turple[1] / value)
-
-def getPosition(pos, length, sincos):
-    return pos + (pos[0] + length * sincos[0], pos[1] + length * sincos[1])
-
 def DrawDial(ticks):
+
+    def div(turple, value):
+#    return (x / value for x in turple)
+        return (turple[0] / value, turple[1] / value)
+
+    def getPosition(pos, length, sincos):
+        return pos + (pos[0] + length * sincos[0], pos[1] + length * sincos[1])
+
     image = Image.new(mode = "P", size = (width, height))
     image.putpalette([0, 0, 0, 128, 128, 128, 255, 255, 255])
     draw = ImageDraw.Draw(image)
@@ -66,17 +67,17 @@ def getImagesFromGif(filename):
     im = Image.open(filename)
     return [frame.copy() for frame in ImageSequence.Iterator(im)]
 
-import time
-#main
-t = time.localtime(time.time())[:6]
-t1 = [t[2], t[1], t[3], t[4], t[5]]
-print t
-print t1
-print '_'.join(map(str, t1))
-getCurrentTime = lambda : time.localtime(time.time())[:6]
-transformOrder = lambda t: [t[2], t[1], t[3], t[4], t[5]]
-convertToString = lambda data: '_'.join(map(str, data))
-getCurrentTimeInMyFormat = convertToString(transformOrder(getCurrentTime()))
-print getCurrentTimeInMyFormat
-#writeGif(filename, DrawDials(Tick(0, 0, 0), Tick(15, 5, 0)), duration = 0.000000001, dither = 1)
-
+if __name__ == '__main__':
+    import time
+    #main
+    t = time.localtime(time.time())[:6]
+    t1 = [t[2], t[1], t[3], t[4], t[5]]
+    print t
+    print t1
+    print '_'.join(map(str, t1))
+    getCurrentTime = lambda : time.localtime(time.time())[:6]
+    transformOrder = lambda t: [t[2], t[1], t[3], t[4], t[5]]
+    convertToString = lambda data: '_'.join(map(str, data))
+    getCurrentTimeInMyFormat = convertToString(transformOrder(getCurrentTime()))
+    print getCurrentTimeInMyFormat
+    #writeGif(filename, DrawDials(Tick(0, 0, 0), Tick(15, 5, 0)), duration = 0.000000001, dither = 1)
