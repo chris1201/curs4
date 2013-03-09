@@ -2,15 +2,18 @@ from images2gif import writeGif
 from PIL import Image, ImageSequence, ImageDraw, ImagePalette
 from math import pi, sin, cos
 
-width = 80
-height = 80
 hourwidth = 4
 minwidth = 2
 secwidth = 1
-hourlength = 8
-minlength = 3 * width / 16
-seclength = width / 2
-filename = "1.gif"
+hourlength = 4
+isDrawSecond = True
+isDrawMinit = True
+isDrawHour = False
+#filename = "1.gif"
+colorBlack = 0
+colorWhite = 1
+colorGrey = 2
+
 
 class Tick:
     def __init__(self, secs, minutes, hours):
@@ -35,7 +38,7 @@ class Tick:
         else:
             return False
 
-def DrawDial(ticks):
+def DrawDial(ticks, size):
 
     def div(turple, value):
 #    return (x / value for x in turple)
@@ -44,21 +47,26 @@ def DrawDial(ticks):
     def getPosition(pos, length, sincos):
         return pos + (pos[0] + length * sincos[0], pos[1] + length * sincos[1])
 
-    image = Image.new(mode = "P", size = (width, height))
-    image.putpalette([0, 0, 0, 128, 128, 128, 255, 255, 255])
+    image = Image.new(mode = "P", size = (size, size))
+    image.putpalette([0, 0, 0, 255, 255, 255, 128, 128, 128])
     draw = ImageDraw.Draw(image)
-    draw.ellipse((0, 0) + image.size, fill = 2)
-    draw.line(getPosition(div(image.size, 2), seclength, ticks.getSecAngle()), fill = 1, width = secwidth)
-    draw.line(getPosition(div(image.size, 2), seclength, ticks.getMinAngle()), fill = 1, width = minwidth)
-    #draw.line(div(image.size, 2) + getPosition(hourlength, ticks.getHourAngle()), fill = 1, width = hourwidth)
+    draw.ellipse((0, 0) + image.size, fill = colorWhite)
+    minlength = size / 4
+    seclength = size / 2
+    if (isDrawSecond):
+        draw.line(getPosition(div(image.size, 2), seclength, ticks.getSecAngle()), fill = colorGrey, width = secwidth)
+    if (isDrawMinit):
+        draw.line(getPosition(div(image.size, 2), minlength, ticks.getMinAngle()), fill = colorGrey, width = minwidth)
+    if (isDrawHour):
+        draw.line(div(image.size, 2) + getPosition(hourlength, ticks.getHourAngle()), fill = colorGrey, width = hourwidth)
     del draw
     return image.copy()
 
-def DrawDials(tickbegin, tickend):
+def DrawDials(tickbegin, tickend, size):
     tick = Tick(tickbegin.secs, tickbegin.minutes, tickbegin.hours)
     ret = ()
     while (tick != tickend):
-        ret = ret + (DrawDial(tick),)
+        ret = ret + (DrawDial(tick, size),)
         tick.inc()
     del tick
     return ret

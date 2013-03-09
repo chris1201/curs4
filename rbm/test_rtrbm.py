@@ -78,8 +78,10 @@ mode = 1
 if mode == 1:
     #new_rbm
     bm = rtrbm.createSimpleRTRBM(200, size * size)
+#    bm.gibbsSamplingPredictionWithOutCoin
+#    bm.gibbsSamplingFromRnd
     print 'learning has started'
-#    train(bm, data, 200, 1, 0.01)
+    train(bm, data, 200, 1, 0.01)
     trainByElement(bm, data, 50, 5, 0.01)
     utils.saveData(bm.save().getvalue())
     print 'to save was done'
