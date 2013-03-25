@@ -16,6 +16,7 @@ from theano.tensor.basic import TensorVariable
 MODE_WITHOUT_COIN = 0;
 MODE_WITH_COIN = 1;
 
+
 class BM:
     def __init__(self, theanoRnd):
         self.theanoRnd = theanoRnd
@@ -283,32 +284,24 @@ class RTRBM:
     def gradient(self, sample, countStep, function_mode):
         # GradientBlock = [energy, gradUByW1, gradUByW2, gradUByhBias, gradUByvBias, gradUByW, gradH_lid0]
         def GradientForOneObject(sample, dream, h_lids, vBias, hBias):
-            energy = self.bm.freeEnergy(sample, self.W, vBias.T, hBias) - self.bm.freeEnergy(dream, self.W, vBias.T, hBias)
-            energy = T.sum(energy)
+            energy = self.bm.freeEnergy(sample, self.W, vBias, hBias) - self.bm.freeEnergy(dream, self.W, vBias, hBias)
+            # energy = T.sum(energy)
             grad = theano.grad(energy, [self.W, vBias, hBias], consider_constant=[sample, dream])
-            gradUByW1 = T.dot(grad[1].T, h_lids);
-            gradUByW2 = T.dot(grad[2].T, h_lids);
-            gradUByhBias = T.sum(grad[2], axis=0);
-            gradUByvBias = T.sum(grad[1], axis=0);
+            gradUByW1 = T.outer(grad[1], h_lids);
+            gradUByW2 = T.outer(grad[2], h_lids);
+            gradUByhBias = (grad[2]);
+            gradUByvBias = (grad[1]);
             gradUByW = grad[0];
-            gradHLid0 = self.h_lid_0 - T.mean(h_lids);
-
-            # gradUByW1 = T.outer(grad[1], h_lids);
-            # gradUByW2 = T.outer(grad[2], h_lids);
-            # gradUByhBias = (grad[2]);
-            # gradUByvBias = (grad[1]);
-            # gradUByW = grad[0];
-            # gradHLid0 = (h_lids);
+            gradHLid0 = (h_lids);
             return [energy, gradUByW1, gradUByW2, gradUByhBias, gradUByvBias, gradUByW, gradHLid0]
             # return [energy, grad[0], grad[1], grad[2], gradUByW1, gradUByW2, gradUByhBias]
 
         def GradientForOneTimeAutoGenerate(sample):
             # input one object = [time * visible]
             dream, h_lids, update, vBiases, hBiases = self.gibbs(sample, countStep, function_mode)
-            # res, update1 = theano.scan(GradientForOneObject, sequences=[sample, dream, h_lids, vBiases, hBiases])
-            res = GradientForOneObject(sample, dream, h_lids, vBiases, hBiases)
-            # res2 = [T.sum(grad, axis=0) for grad in res]
-            return res, update# + update1
+            res, update1 = theano.scan(GradientForOneObject, sequences=[sample, dream, h_lids, vBiases, hBiases])
+            res2 = [T.sum(grad, axis=0) for grad in res]
+            return res2, update + update1
 
         def GradientForAllTime(samples):
             Q, updates = theano.scan(GradientForOneTimeAutoGenerate, sequences=samples)
@@ -317,9 +310,7 @@ class RTRBM:
 
         GradientBlock = [self.W1, self.W2, self.hBiasbase, self.vBiasbase, self.W, self.h_lid_0]
         output, updates = GradientForAllTime(sample);
-        # output[-1] = self.h_lid_0 - output[-1]
-        # output, updates = GradientForOneTimeAutoGenerate(sample)
-        # return output[0], GradientBlock, output[1:], updates
+        output[-1] = self.h_lid_0 - output[-1]
         return output[0], GradientBlock, output[1:], updates
 
     def grad_function(self, countStep, learningRate, function_mode):
@@ -327,8 +318,8 @@ class RTRBM:
         energy, gb, grad, upd = self.gradient(samples, countStep, function_mode)
         self.bm.addGradientToUpdate(upd, gb, grad, learningRate)
         Varibles = [samples]
-        # if isinstance(countStep, TensorVariable):
-        #     Varibles.append(countStep)
-        # if isinstance(learningRate, TensorVariable):
-        #     Varibles.append(learningRate)
+        if isinstance(countStep, TensorVariable):
+            Varibles.append(countStep)
+        if isinstance(learningRate, TensorVariable):
+            Varibles.append(learningRate)
         return theano.function(Varibles, energy, updates=upd)

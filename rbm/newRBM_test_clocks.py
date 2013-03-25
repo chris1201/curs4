@@ -16,53 +16,38 @@ app = dials[0];
 dataPrime = [convertImageToVector(element) for element in dials];
 
 elementLength = 5;
-countStep = 50;
-trainBlock = 15;
-countGibbs = 5;
-learningRate = 0.01
+countStep = 200;
+# trainBlock = 15;
+# countGibbs = 5;
+# learningRate = 0.01
 
 
 data = [dataPrime[idx:((idx + elementLength))] + (
     [] if (idx + elementLength) / len(dataPrime) == 0 else dataPrime[:((idx + elementLength) % len(dataPrime))])
                               for idx in range(len(dataPrime))]
 
-rtrbm = createSimpleRTRBM(3000, imagesize * imagesize)
+rtrbm = createSimpleRTRBM(200, imagesize * imagesize)
 
-# func = rtrbm.grad_function(countGibbs, numpy.asarray(learningRate, dtype='float32'), MODE_WITHOUT_COIN)
 
-# tic()
-
-# print func(data[1:15]), "   ololo   ",toc()
+func = rtrbm.grad_function(5, numpy.asarray(0.01, dtype='float32'), MODE_WITHOUT_COIN)
 
 m = T.matrix()
-count = T.iscalar()
-f, a, u, b, c = rtrbm.gibbs(m, 2, MODE_WITHOUT_COIN)
-f = theano.function([m], [f, a, b, c], updates=u)
-for x in f(numpy.zeros((10, 900))):
-    print numpy.shape(x)
-
-# for x in f(numpy.zeros((10, 900)), 2):
-#     print numpy.shape(x)
-
-
-FUNCTION_MODE = MODE_WITHOUT_COIN
-countGibbs = 1
-m = T.tensor3()
-energy, gradVarible, gradient, updates = rtrbm.gradient(m, countGibbs, FUNCTION_MODE)
-rtrbm.bm.addGradientToUpdate(updates, gradVarible, gradient, numpy.asarray(0.01, dtype='float32'))
-func = theano.function([m], energy, updates=updates)
-tic()
-u = func(data[1:15])
-print u, toc()
+f, _, u, _, _ = rtrbm.gibbs(m, 1, MODE_WITHOUT_COIN)
+f = theano.function([m], f, updates=u)
 # for x in u:
 #     print numpy.shape(x)
 
-# for idx in range(countStep):
-#     trainBlock = data[1:15]
-#     tic()
-#     print idx, func(trainBlock), ', time:', toc()
-    # if idx % 20 == 0:
-    #     makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(data[1]))).save(str(idx) + "anim_train2.gif", "GIF")
+x1 = numpy.repeat([dataPrime[1]], 5, 0)
+x2 = numpy.repeat([dataPrime[5]], 5, 0)
+
+for idx in range(countStep):
+    trainBlock = data[1:15]
+    tic()
+    print idx, func(trainBlock), ', time:', toc()
+    if idx % 50 == 0:
+        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(data[1]))).save(str(idx) + "anim_train5.gif", "GIF")
+        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(x1))).save(str(idx) + "x1anim_train5.gif", "GIF")
+        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(x2))).save(str(idx) + "x2anim_train5.gif", "GIF")
 
 # saveData(rtrbm.save())
 
