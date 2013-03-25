@@ -2,6 +2,7 @@ __author__ = 'gavr'
 
 import StringIO
 import numpy
+import os
 from PIL import Image
 
 def convertImageToVector(image):
@@ -25,13 +26,13 @@ def convertProbabilityMatrixToImages(appearance, matrix):
 
 # save Data
 def saveData(strio):
-    file = open('data.txt', 'w')
+    file = open(ccd.currentDirectory + 'data.txt', 'w')
     file.write(strio)
     file.close()
 
 # readData from data.txt
 def getStringData():
-    file = open('data.txt', 'r')
+    file = open(ccd.currentDirectory + 'data.txt', 'r')
     s = StringIO.StringIO()
     output = file.readlines()
     s.writelines(output)
@@ -49,8 +50,21 @@ def makeAnimImageFromImages(data):
         imag.paste(data[idx], (0, idx * size0[1], size0[1], (idx + 1) * size0[1]))
     return imag
 
+def saveImage(image, filename, ext='GIF'):
+    image.save(ccd.currentDirectory + filename + '.' + ext, ext)
+
+class ContainerCurrentDirectory:
+    def __init__(self):
+        currentDirectory = ''
+
+ccd = ContainerCurrentDirectory()
+
+def setCurrentDirectory(name):
+    ccd.currentDirectory = name + '/'
+    print "set current dir: ", ccd.currentDirectory
+    if not os.path.exists(ccd.currentDirectory):
+        os.makedirs(ccd.currentDirectory)
+
 # todo image concatinate by horizontal, by vertical
 # todo plot full image(ala mesh)
-# 
-
-  
+#
