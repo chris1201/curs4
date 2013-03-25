@@ -106,10 +106,10 @@ class RBM:
         # save this function
         self.gibbsFromRnd = theano.function(inputs=[countGibbsSteps], outputs=gibbsFromRnd_format, updates=updates_gibbs_rnd)
         # cost depends from data, countGibbsSteps
-        cost = T.mean(freeEnergy_format(data)) - (freeEnergy_format_vector(gibbsFromRnd_format_matrix))
+        cost = T.mean(freeEnergy_format(data)) - T.mean(freeEnergy_format(gibbs_matrix_format))
         gradBlock = [W, vBias, hBias]
-        gradient = theano.grad(cost, gradBlock, consider_constant=[data, gibbsFromRnd_format_matrix])
-        updates = updates_gibbs_rnd
+        gradient = theano.grad(cost, gradBlock, consider_constant=[data, gibbs_matrix_format])
+        updates = updates_gibbs_matrix
         for value, grad in zip(gradBlock, gradient):
             updates[value] = value - learningRate * grad
         self.grad_step = theano.function([data, learningRate, countGibbsSteps], cost, updates=updates)

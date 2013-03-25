@@ -46,7 +46,7 @@ for x in f(numpy.zeros((10, 900))):
 
 
 FUNCTION_MODE = MODE_WITHOUT_COIN
-countGibbs = 2
+countGibbs = 1
 m = T.tensor3()
 energy, gradVarible, gradient, updates = rtrbm.gradient(m, countGibbs, FUNCTION_MODE)
 rtrbm.bm.addGradientToUpdate(updates, gradVarible, gradient, numpy.asarray(0.01, dtype='float32'))

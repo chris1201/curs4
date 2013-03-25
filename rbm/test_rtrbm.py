@@ -6,6 +6,7 @@ from PIL import ImageDraw
 from numpy.oldnumeric.random_array import random_integers
 import utils
 import numpy
+import tictoc
 
 def generatorImage(size, quadrants):
     image = Image.new(mode = "P", size = (size, size))
@@ -59,16 +60,18 @@ def makeAnimImageFromImages(data):
 
 def train(bm, data, countStep, countGibbs, learningRate):
     for idx in range(1, countStep):
-        print idx, bm.grad_step(data, countGibbs, numpy.asarray(learningRate, dtype='float32'))
+        tictoc.tic()
+        print idx, bm.grad_step(data, countGibbs, numpy.asarray(learningRate, dtype='float32')), ', time: ', tictoc.toc()
 
 def trainByElement(bm, data, countStep, countGibbs, learningRate):
     for idx in range(1, countStep):
         for index in range(0, len(data)):
-            print idx, index, bm.grad_step([data[index]], countGibbs, numpy.asarray(learningRate, dtype='float32'))
+            tictoc.tic()
+            print idx, index, bm.grad_step([data[index]], countGibbs, numpy.asarray(learningRate, dtype='float32')), ', time: ', tictoc.toc()
 
 
 # initial
-size = 10
+size = 30
 countFrames = 2
 appereance = generatorAnimImag(size)
 #data
@@ -77,11 +80,12 @@ data = [convertAnimToDataBlock(generatorAnimLine(size, idx, countFrames)) for id
 mode = 1
 if mode == 1:
     #new_rbm
-    bm = rtrbm.createSimpleRTRBM(200, size * size)
+    tictoc.tic()
+    bm = rtrbm.createSimpleRTRBM(900, size * size)
 #    bm.gibbsSamplingPredictionWithOutCoin
 #    bm.gibbsSamplingFromRnd
-    print 'learning has started'
-    train(bm, data, 200, 1, 0.01)
+    print 'learning has started',     tictoc.toc()
+    train(bm, data, 200, 5, 0.01)
     trainByElement(bm, data, 50, 5, 0.01)
     utils.saveData(bm.save().getvalue())
     print 'to save was done'
@@ -89,4 +93,4 @@ else:
     #load_rbm
     bm = rtrbm.openRTRBM(utils.getStringData())
 
-makeAnimImageFromImages(temp).show()
+# makeAnimImageFromImages(bm.gibbsSamplingFromRnd()).show()

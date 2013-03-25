@@ -308,7 +308,7 @@ class RTRBM:
             # res, update1 = theano.scan(GradientForOneObject, sequences=[sample, dream, h_lids, vBiases, hBiases])
             res = GradientForOneObject(sample, dream, h_lids, vBiases, hBiases)
             # res2 = [T.sum(grad, axis=0) for grad in res]
-            return [res, update]# + update1
+            return res, update# + update1
 
         def GradientForAllTime(samples):
             Q, updates = theano.scan(GradientForOneTimeAutoGenerate, sequences=samples)
@@ -327,8 +327,8 @@ class RTRBM:
         energy, gb, grad, upd = self.gradient(samples, countStep, function_mode)
         self.bm.addGradientToUpdate(upd, gb, grad, learningRate)
         Varibles = [samples]
-        if isinstance(countStep, TensorVariable):
-            Varibles.append(countStep)
-        if isinstance(learningRate, TensorVariable):
-            Varibles.append(learningRate)
+        # if isinstance(countStep, TensorVariable):
+        #     Varibles.append(countStep)
+        # if isinstance(learningRate, TensorVariable):
+        #     Varibles.append(learningRate)
         return theano.function(Varibles, energy, updates=upd)

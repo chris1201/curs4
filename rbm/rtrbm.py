@@ -18,7 +18,7 @@ from numpy.oldnumeric.random_array import random_integers
 from theano.tensor.shared_randomstreams import RandomStreams
 
 class RTRBM:
-    def __init__(self, hidden, visible, rnd, theanoRnd, W = None, hBias = None, vBias = None, W1 = None, W2 = None, h_lid_0 = None, not_random = None):
+    def __init__(self, hidden, visible, rnd, theanoRnd, W = None, hBias = None, vBias = None, W1 = None, W2 = None, h_lid_0 = None, not_random = True):
         self.hidden = hidden
         self.visible = visible
 
@@ -88,6 +88,7 @@ class RTRBM:
         # function for make one gibbs-step
         gibbsOne_format = lambda sample, vBiases, hBiases: samplingVbyH_format(samplingHbyV_format(sample, hBiases), vBiases)
         gibbsOneWithOutCoin_format = lambda sample, vBiases, hBiases: computeProbabilitiesVByH_format(computeProbabilitiesHByV_format(sample, hBiases), vBiases)
+        # gibbsOne_format = gibbsOneWithOutCoin_format
         # function for generate initial state for visible varibles
         #   Parameter: lengthOfSequence
         generateRandomVisiblesForOneTime_format = lambda: theanoRnd.binomial(size=vBias.shape, n=1, p=T.ones_like(vBias) * 0.5, dtype='floatX')
@@ -95,7 +96,7 @@ class RTRBM:
             rnd, unusedUpdates = theano.scan(generateRandomVisiblesForOneTime_format, n_steps=length)
             return rnd
         # templates of Varibles for calculate h_lid by previous value
-        calc_h_lid = lambda h_lid_old, sample: T.nnet.sigmoid(T.dot(sample, W) + T.dot(W2, h_lid_old) + hBias)
+        calc_h_lid = lambda h_lid_old, sample: T.nnet.sigmoid(T.dot(sample, W) + hBias)
         calc_hBiases = lambda h_lid: hBias + T.dot(h_lid, W2.T)
         calc_vBiases = lambda h_lid: vBias + T.dot(h_lid, W1.T)
         # Make For One input Image(sample) gibbs-sampling for one-time
@@ -103,12 +104,12 @@ class RTRBM:
         def gibbsSamplingForOneStepTime(sample, h_lid):
             res, updates = theano.scan(gibbsOne_format, outputs_info=sample, non_sequences=[calc_vBiases(h_lid), calc_hBiases(h_lid)], n_steps=countGibbsSteps)
             res = res[-1]
-            return [[res, calc_h_lid(h_lid, res)], updates]
+            return [[res, calc_h_lid(h_lid, sample)], updates]
         # Make For input image gibbs-sampling for one-time
         def gibbsSamplingForOneStepTimeWithOutCoin(sample, h_lid):
             res, updates = theano.scan(gibbsOneWithOutCoin_format, outputs_info=sample, non_sequences=[calc_vBiases(h_lid), calc_hBiases(h_lid)], n_steps=countGibbsSteps)
             res = res[-1]
-            return [[res, calc_h_lid(h_lid, res)], updates]
+            return [[res, calc_h_lid(h_lid, sample)], updates]
         # Make gibbs-sampling for all-time
         #   Parameter: countGibbsStep
         def gibbsSamplingForAllTime(sample, start_h_lid):
@@ -174,7 +175,7 @@ class RTRBM:
             gradUByhBias = T.sum(grad[2], axis=0);
             gradUByvBias = T.sum(grad[1], axis=0);
             gradUByW = grad[0];
-            gradHLid0 = grad[2][0];
+            gradHLid0 = h_lid_0 - T.mean(h_lids);
             #block = [W1, W2, hBias, vBias, W, hlid0]
             grad_block_return = [P, gradUByW1, gradUByW2, gradUByhBias, gradUByvBias, gradUByW, gradHLid0]
             return grad_block_return, updates
@@ -199,8 +200,10 @@ class RTRBM:
         block = [W1, W2, hBias, vBias, W, h_lid_0]
         if not_random is None:
             func = calc_grad_Energy_For_One_Object_By_Rnd
+            print "Using random aprroximate"
         else:
             func = calc_grad_Energy_For_One_Object_By_Data
+            print "Using data approximate"
         alls, upds = calc_grad_Energy_For_Input_Objects(data, func)
         for u, v in zip(block, alls[1:]):
             upds[u] = u - learningRate * v
@@ -235,7 +238,7 @@ def createSimpleRTRBM(hidden, visible):
     return RTRBM(hidden, visible, numpyRng, theanoRng)
 
 def openRTRBM(strio):
-    print strio
+    # print strio
     array = strio.split('\n')
     parse_vector = lambda str: map(float, str.split(','))
     parse_matrix = lambda str: [parse_vector(substr) for substr in str.split('],')]
