@@ -2,17 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="179b7a64-c827-49b8-849d-ad270b24225f" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/rbm/RBM_test_clocks.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/rbm/newRBM_test_clocks.py" afterPath="$PROJECT_DIR$/rbm/RTRBM_test_clocks.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rbm/RBM_test_clocks.py" afterPath="$PROJECT_DIR$/rbm/RBM_test_clocks.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rbm/newRTRBM.py" afterPath="$PROJECT_DIR$/rbm/newRTRBM.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rbm/utils.py" afterPath="$PROJECT_DIR$/rbm/utils.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="untitled.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="179b7a64-c827-49b8-849d-ad270b24225f" time="1364221010321" ignored="false" />
     <file path="/newRBM_test_clocks.py" changelist="179b7a64-c827-49b8-849d-ad270b24225f" time="1364210381823" ignored="false" />
-    <file path="/utils.py" changelist="179b7a64-c827-49b8-849d-ad270b24225f" time="1364223077691" ignored="false" />
+    <file path="/utils.py" changelist="179b7a64-c827-49b8-849d-ad270b24225f" time="1364224146205" ignored="false" />
     <file path="/RBM_test_clocks.py" changelist="179b7a64-c827-49b8-849d-ad270b24225f" time="1364223300871" ignored="false" />
+    <file path="/newRTRBM.py" changelist="179b7a64-c827-49b8-849d-ad270b24225f" time="1364224337472" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,34 +32,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="RTRBM_test_clocks.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/rbm/RTRBM_test_clocks.py">
+      <file leaf-file-name="newRTRBM.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/rbm/newRTRBM.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="15" selection-start="263" selection-end="263" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#21#43#0" expanded="true" />
-              </folding>
+            <state line="165" column="46" selection-start="7078" selection-end="7078" vertical-scroll-proportion="0.6938776">
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RBM_test_clocks.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="RBM_test_clocks.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/rbm/RBM_test_clocks.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="15" selection-start="421" selection-end="421" vertical-scroll-proportion="0.4811321">
+            <state line="69" column="29" selection-start="2621" selection-end="2621" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#21#43#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="utils.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/rbm/utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="65" column="41" selection-start="1879" selection-end="1879" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#21#36#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -85,11 +72,11 @@
       <list>
         <option value="$PROJECT_DIR$/main" />
         <option value="$PROJECT_DIR$/rbm/clocks.py" />
-        <option value="$PROJECT_DIR$/rbm/newRTRBM.py" />
         <option value="$PROJECT_DIR$/rbm/newRBM_test_clocks.py" />
         <option value="$PROJECT_DIR$/rbm/RTRBM_test_clocks.py" />
         <option value="$PROJECT_DIR$/rbm/utils.py" />
         <option value="$PROJECT_DIR$/rbm/RBM_test_clocks.py" />
+        <option value="$PROJECT_DIR$/rbm/newRTRBM.py" />
       </list>
     </option>
   </component>
@@ -155,24 +142,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="rbm" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="untitled" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="curs4" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="rbm" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="25_3_13_rbm_test_temp" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -273,6 +242,23 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
+    <configuration default="false" name="newRTRBM" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/rbm" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <module name="untitled" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rbm/newRTRBM.py" />
+      <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -327,18 +313,20 @@
       <option name="USE_PATTERN" value="false" />
       <method />
     </configuration>
-    <list size="4">
+    <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.main" />
       <item index="1" class="java.lang.String" itemvalue="Python.RTRBM_test_clocks" />
       <item index="2" class="java.lang.String" itemvalue="Python.utils" />
       <item index="3" class="java.lang.String" itemvalue="Python.RBM_test_clocks" />
+      <item index="4" class="java.lang.String" itemvalue="Python.newRTRBM" />
     </list>
     <recent_temporary>
-      <list size="4">
+      <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.RBM_test_clocks" />
-        <item index="1" class="java.lang.String" itemvalue="Python.utils" />
-        <item index="2" class="java.lang.String" itemvalue="Python.RTRBM_test_clocks" />
-        <item index="3" class="java.lang.String" itemvalue="Python.main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.newRTRBM" />
+        <item index="2" class="java.lang.String" itemvalue="Python.utils" />
+        <item index="3" class="java.lang.String" itemvalue="Python.RTRBM_test_clocks" />
+        <item index="4" class="java.lang.String" itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -378,11 +366,11 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32850242" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32214227" sideWeight="0.6215781" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32134292" sideWeight="0.6215781" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39388794" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3784219" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3784219" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -447,20 +435,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="2" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/rbm/clocks.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="11" column="32" selection-start="338" selection-end="338" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rbm/newRTRBM.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="253" column="37" selection-start="10762" selection-end="10762" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -474,7 +455,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/rbm/RTRBM_test_clocks.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="15" selection-start="263" selection-end="263" vertical-scroll-proportion="0.0">
+        <state line="35" column="26" selection-start="987" selection-end="987" vertical-scroll-proportion="1.5306122">
           <folding>
             <element signature="e#21#43#0" expanded="true" />
           </folding>
@@ -483,44 +464,26 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/rbm/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="65" column="41" selection-start="1879" selection-end="1879" vertical-scroll-proportion="0.0">
+        <state line="76" column="1" selection-start="2130" selection-end="2130" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#21#36#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/rbm/25_3_13_rbm_test_temp/1.GIF">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rbm/25_3_13_rbm_test_temp/1f.GIF">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rbm/25_3_13_rbm_test_temp/2.GIF">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rbm/25_3_13_rbm_test_temp/2f.GIF">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rbm/25_3_13_rbm_test_temp/3.GIF">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/rbm/RBM_test_clocks.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="15" selection-start="421" selection-end="421" vertical-scroll-proportion="0.4811321">
+        <state line="69" column="29" selection-start="2621" selection-end="2621" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#21#43#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rbm/newRTRBM.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="165" column="46" selection-start="7078" selection-end="7078" vertical-scroll-proportion="0.6938776">
+          <folding />
         </state>
       </provider>
     </entry>

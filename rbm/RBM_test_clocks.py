@@ -14,14 +14,14 @@ appearance = dials[0]
 #   divide to blocks
 dataPrime = [convertImageToVector(element) for element in dials]
 
-eachIteration = 5
-countStep = 201
+eachIteration = 50
+countStep = 801
 countGibbs = 20
 learningRate = 0.01
 
 
 # rbm = OpenRBM(getStringData())
-rbm = createSimpleRBM(1000, 900)
+rbm = createSimpleRBM(300, 900)
 m = T.matrix()
 n = T.iscalar()
 s = T.fscalar()

@@ -163,7 +163,7 @@ class RBM:
     def grad_function(self, samples, countStep, function_mode, learning_rate):
         energy, grad, gradBlock, update = self.gradient(samples, countStep, function_mode)
         for u, v in zip(gradBlock, grad):
-            update[u] = u - learning_rate * v
+            update[u] = u - learning_rate * (v + 0.1123 * u)
         Varibles = [samples]
         if isinstance(countStep, TensorVariable):
             Varibles.append(countStep)

@@ -3,6 +3,7 @@ __author__ = 'gavr'
 import StringIO
 import numpy
 import os
+import shutil
 from PIL import Image
 
 def convertImageToVector(image):
@@ -55,7 +56,7 @@ def saveImage(image, filename, ext='GIF'):
 
 class ContainerCurrentDirectory:
     def __init__(self):
-        currentDirectory = ''
+        self.currentDirectory = ''
 
 ccd = ContainerCurrentDirectory()
 
@@ -64,6 +65,12 @@ def setCurrentDirectory(name):
     print "set current dir: ", ccd.currentDirectory
     if not os.path.exists(ccd.currentDirectory):
         os.makedirs(ccd.currentDirectory)
+
+def clearCurrentDirectory():
+    shutil.rmtree(ccd.currentDirectory)
+
+# setCurrentDirectory('25_3_13_rbm_test_temp')
+# clearCurrentDirectory()
 
 # todo image concatinate by horizontal, by vertical
 # todo plot full image(ala mesh)
