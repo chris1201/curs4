@@ -13,9 +13,12 @@ from theano.tensor.shared_randomstreams import RandomStreams
 from tictoc import tic, toc
 from theano.tensor.basic import TensorVariable
 
-MODE_WITHOUT_COIN = 0;
-MODE_WITH_COIN = 1;
+MODE_WITHOUT_COIN = 0
+MODE_WITH_COIN = 1
+MODE_WITH_COIN_EXCEPT_LAST = 2
+MODE_WITHOUT_COIN_EXCEPT_LAST = 3
 
+MODE_NAMES = ['W', 'WO', 'WELast', 'WOELast']
 
 class BM:
     def __init__(self, theanoRnd):
@@ -40,11 +43,36 @@ class BM:
                 self.generateRandomsFromBinoZeroOne(self.computeProbabilityHByV(sample, W, hBias)), W, vBias))
 
     def gibbs(self, sample, W, vBias, hBias, countSteps, function_mode):
-        gibbsOne_format = lambda sample: self.list_function_for_gibbs[function_mode](sample, W, vBias, hBias);
-        format, updates = theano.scan(fn=gibbsOne_format, \
-                                      outputs_info=sample, \
-                                      n_steps=countSteps)
+        format, updates = self.gibbs_all(sample, W, vBias, hBias, countSteps, function_mode)
         return format[-1], updates
+
+    def gibbs_all(self, sample, W, vBias, hBias, countSteps, function_mode):
+        if function_mode < 2:
+            gibbsOne_format = lambda sample: self.list_function_for_gibbs[function_mode](sample, W, vBias, hBias);
+            format, updates = theano.scan(fn=gibbsOne_format, \
+                                          outputs_info=sample, \
+                                          n_steps=countSteps)
+            return format, updates
+        else:
+            if function_mode == MODE_WITH_COIN_EXCEPT_LAST:
+                gibbsOne_format = lambda sample: self.list_function_for_gibbs[MODE_WITH_COIN](sample, W, vBias, hBias);
+                format, updates = theano.scan(fn=gibbsOne_format, \
+                                          outputs_info=sample, \
+                                          n_steps=countSteps - 1)
+                gibbsOne_format = lambda sample: self.list_function_for_gibbs[MODE_WITHOUT_COIN](sample, W, vBias, hBias);
+                res = gibbsOne_format(format[-1])
+                res = T.concatenate([format, [res]])
+                return res, updates
+            else:
+                gibbsOne_format = lambda sample: self.list_function_for_gibbs[MODE_WITHOUT_COIN](sample, W, vBias, hBias);
+                format, updates = theano.scan(fn=gibbsOne_format, \
+                                              outputs_info=sample, \
+                                              n_steps=countSteps - 1)
+                gibbsOne_format = lambda sample: self.list_function_for_gibbs[MODE_WITH_COIN](sample, W, vBias, hBias);
+                res = gibbsOne_format(format[-1])
+                res = T.concatenate([format, [res]])
+                return res, updates
+
 
     def freeEnergy(self, sample, W, vBias, hBias):
         xdotw_plus_bias = T.dot(sample, W) + hBias
@@ -160,10 +188,15 @@ class RBM:
         grad = theano.grad(energy, gradBlock, [samples, dream])
         return energy, grad, gradBlock, update
 
-    def grad_function(self, samples, countStep, function_mode, learning_rate):
+    def grad_function(self, samples, countStep, function_mode, learning_rate, regularization = 0):
         energy, grad, gradBlock, update = self.gradient(samples, countStep, function_mode)
         for u, v in zip(gradBlock, grad):
-            update[u] = u - learning_rate * (v + 0.1123 * u)
+            update[u] = u - learning_rate * (v + u * regularization)
+                                             #+ 0.421 * u)
+                                             # 0.01239 * u)
+                                             # 0.321 * u)
+                                             # 0.123 * u)
+                                             # 0.05721 * u) # + 0.0923 * u)
         Varibles = [samples]
         if isinstance(countStep, TensorVariable):
             Varibles.append(countStep)

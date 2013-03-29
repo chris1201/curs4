@@ -85,8 +85,21 @@ def getImagesFromGif(filename):
 def SetGreyAsBlack():
     info_clock.colorGrey = info_clock.colorBlack
 
+def SwapBlackAndWhite():
+    x = info_clock.colorBlack
+    y = info_clock.colorWhite
+    if info_clock.colorWhite == info_clock.colorGrey:
+        info_clock.colorGrey = x
+
 def SetDontDrawBlackContour():
     info_clock.isDrawBlackCircle = False
+
+def SetDrawBlackContour():
+    info_clock.isDrawBlackCircle = True
+
+
+def SetSecWidth(width):
+    info_clock.secwidth = width
 
 if __name__ == '__main__':
     import time

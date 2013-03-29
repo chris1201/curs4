@@ -22,12 +22,18 @@ def convertProbabilityVectorToImage(appereance, vector):
 def convertMatrixToImages(appearance, matrix):
     return map(lambda x: convertVectorToImage(appearance, x), matrix)
 
+def convertTensorToImages(appearance, tensor):
+    return map(lambda x: convertMatrixToImages(appearance, x), tensor)
+
 def convertProbabilityMatrixToImages(appearance, matrix):
     return map(lambda x: convertProbabilityVectorToImage(appearance, x), matrix)
 
+def convertProbabilityTensorToImages(appearance, tensor):
+    return map(lambda x: convertProbabilityMatrixToImages(appearance, x), tensor)
+
 # save Data
-def saveData(strio):
-    file = open(ccd.currentDirectory + 'data.txt', 'w')
+def saveData(strio, filename = 'data.txt'):
+    file = open(ccd.currentDirectory + filename, 'w')
     file.write(strio)
     file.close()
 
@@ -40,7 +46,7 @@ def getStringData():
     file.close()
     return s.getvalue()
 
-def makeAnimImageFromImages(data):
+def makeAnimImageFromVectorImages(data):
     count = len(data)
     size0 = data[0].size
     size = (size0[0], count * size0[1])
@@ -49,6 +55,21 @@ def makeAnimImageFromImages(data):
         imag.putpalette(data[0].getpalette())
     for idx in range(0, count):
         imag.paste(data[idx], (0, idx * size0[1], size0[1], (idx + 1) * size0[1]))
+    return imag
+
+def makeAnimImageFromMatrixImages(data):
+    count1 = len(data)
+    count2 = len(data[0])
+    size0 = data[0][0].size
+    size = (count2 * size0[0], count1 * size0[1])
+    imag = Image.new(size=size, mode=data[0][0].mode)
+    if imag.mode == 'P':
+        imag.putpalette(data[0][0].getpalette())
+    for idx1 in range(count1):
+        for idx2 in range(count2):
+            imag.paste(data[idx1][idx2], \
+                (idx2 * size0[0], idx1 * size0[1], \
+                 (idx2 + 1) * size0[0], (idx1 + 1) * size0[1]))
     return imag
 
 def saveImage(image, filename, ext='GIF'):
@@ -68,8 +89,11 @@ def setCurrentDirectory(name):
 
 def clearCurrentDirectory():
     shutil.rmtree(ccd.currentDirectory)
+# setCurrentDirectory('26_3_13_rbm_wo_regul_gibbs_step_20_hidden_100_widthline_1_iter_2401')
+# setCurrentDirectory('26_3_13_rbm_wo_regul_gibbs_step_80_hidden_100_widthline_1_iter_2401')
+# setCurrentDirectory('26_3_13_rbm_wo_regul_gibbs_step_40_hidden_200_widthline_1_iter_2401')
 
-# setCurrentDirectory('25_3_13_rbm_test_temp')
+# setCurrentDirectory('26_3_13_rbm_wo_regul_gibbs_step_10_hidden_300_widthline_2_iter_2401')
 # clearCurrentDirectory()
 
 # todo image concatinate by horizontal, by vertical

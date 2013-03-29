@@ -47,21 +47,21 @@ for idx in range(200, 200 + countStep):
     tic()
     print idx, func(trainBlock), ', time:', toc()
     if idx % 50 == 0:
-        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(data[1]))).save(str(idx) + "anim_train6.gif", "GIF")
-        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(x1))).save(str(idx) + "x1anim_train6.gif", "GIF")
-        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(x2))).save(str(idx) + "x2anim_train6.gif", "GIF")
+        makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f(data[1]))).save(str(idx) + "anim_train6.gif", "GIF")
+        makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f(x1))).save(str(idx) + "x1anim_train6.gif", "GIF")
+        makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f(x2))).save(str(idx) + "x2anim_train6.gif", "GIF")
 
-        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f5(data[1]))).save(str(idx) + "anim_train6f5.gif", "GIF")
-        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f5(x1))).save(str(idx) + "x1anim_train6f5.gif", "GIF")
-        makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f5(x2))).save(str(idx) + "x2anim_train6f5.gif", "GIF")
+        makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f5(data[1]))).save(str(idx) + "anim_train6f5.gif", "GIF")
+        makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f5(x1))).save(str(idx) + "x1anim_train6f5.gif", "GIF")
+        makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f5(x2))).save(str(idx) + "x2anim_train6f5.gif", "GIF")
 
-makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(data[1]))).save(str(idx) + "anim_train6.gif", "GIF")
-makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(x1))).save(str(idx) + "x1anim_train6.gif", "GIF")
-makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f(x2))).save(str(idx) + "x2anim_train6.gif", "GIF")
+makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f(data[1]))).save(str(idx) + "anim_train6.gif", "GIF")
+makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f(x1))).save(str(idx) + "x1anim_train6.gif", "GIF")
+makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f(x2))).save(str(idx) + "x2anim_train6.gif", "GIF")
 
-makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f5(data[1]))).save(str(idx) + "anim_train6f5.gif", "GIF")
-makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f5(x1))).save(str(idx) + "x1anim_train6f5.gif", "GIF")
-makeAnimImageFromImages(convertProbabilityMatrixToImages(app, f5(x2))).save(str(idx) + "x2anim_train6f5.gif", "GIF")
+makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f5(data[1]))).save(str(idx) + "anim_train6f5.gif", "GIF")
+makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f5(x1))).save(str(idx) + "x1anim_train6f5.gif", "GIF")
+makeAnimImageFromVectorImages(convertProbabilityMatrixToImages(app, f5(x2))).save(str(idx) + "x2anim_train6f5.gif", "GIF")
 
 saveData(rtrbm.save())
 #
