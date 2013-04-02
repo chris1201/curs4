@@ -5,17 +5,24 @@ from clocks import *
 from utils import *
 from tictoc import tic, toc
 
+setCurrentDirectory('tryRTRBM1')
+
 imagesize = 30;
 SetGreyAsBlack()
 # SetDontDrawBlackContour()
 # imagesize
+SetSecWidth(3)
 dials = DrawDials(Tick(0, 0, 0), Tick(59, 0, 0), imagesize);
 app = dials[0];
 #   divide to blocks
 dataPrime = [convertImageToVector(element) for element in dials];
 
-elementLength = 5;
-countStep = 200;
+makeAnimImageFromVectorImages(dials).save('1.gif')
+
+print 'succ'
+
+elementLength = 3;
+countStep = 27000;
 trainBlock = 15;
 countGibbs = 5;
 learningRate = 0.01
@@ -25,8 +32,8 @@ data = [dataPrime[idx:((idx + elementLength))] + (
     [] if (idx + elementLength) / len(dataPrime) == 0 else dataPrime[:((idx + elementLength) % len(dataPrime))])
                               for idx in range(len(dataPrime))]
 #
-rtrbm = createSimpleRTRBM(300, imagesize * imagesize)
-rtrbm = OpenRTRBM(getStringData())
+rtrbm = createSimpleRTRBM(50, imagesize * imagesize)
+# rtrbm = OpenRTRBM(getStringData())
 
 func = rtrbm.grad_function(10, numpy.asarray(0.01, dtype='float32'), MODE_WITHOUT_COIN)
 
@@ -42,8 +49,8 @@ for x in u:
 x1 = numpy.repeat([dataPrime[1]], 5, 0)
 x2 = numpy.repeat([dataPrime[5]], 5, 0)
 
-for idx in range(200, 200 + countStep):
-    trainBlock = data[1:15]
+for idx in range(0, countStep):
+    trainBlock = data
     tic()
     print idx, func(trainBlock), ', time:', toc()
     if idx % 50 == 0:

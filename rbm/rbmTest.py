@@ -1,3 +1,5 @@
+from appindicator._appindicator import app_indicator_get_type
+
 __author__ = 'gavr'
 
 from newRTRBM import *
@@ -5,6 +7,76 @@ from clocks import *
 from utils import *
 from tictoc import tic, toc
 from StringIO import StringIO
+
+def rbmGenerateClocks(imageSize = 30, NotDrawBackGround = False, secWidth = 1):
+    SetGreyAsBlack()
+    if NotDrawBackGround:
+        SetDontDrawBlackContour()
+    else:
+        SetDrawBlackContour()
+    SetSecWidth(secWidth)
+    dials = DrawDials(Tick(0, 0, 0), Tick(59, 0, 0),  imageSize)
+    appearance = dials[0]
+    dataPrime = [convertImageToVector(element) for element in dials]
+    return appearance, dataPrime
+
+def rbmStohasticGradientTest(countIteration = 2401,
+                             countGibbs = 10,
+                             learningRate = 0.01,
+                             learningMode = MODE_WITHOUT_COIN,
+                             outputEveryIteration = 100,
+                             trainBlock = 100,
+                             data = None,
+                             regularization = 0,
+                             numOutputRandom = 5,
+                             hidden = 50,
+                             appearance = None):
+    rbm = createSimpleRBM(hidden, len(data[0]))
+    m = T.matrix()
+    n = T.iscalar()
+    s = T.fscalar()
+    v = T.vector()
+    print "start create learning function", tic()
+    grad_func = rbm.grad_function(m, countGibbs, learningMode, learningRate,
+                                  regularization + (len(data) - trainBlock) * 0.5 / len(data))
+    print "learning function has been built: ", toc()
+    print "start contruct gibbs function"
+    tic()
+    sample = rbm.bm.generateRandomsFromBinoZeroOne(
+        T.reshape(
+            T.repeat(T.ones_like(rbm.vBias) * 0.5, numOutputRandom),
+            (numOutputRandom, len(data[0]))))
+    res, updates = rbm.bm.gibbs_all(sample, rbm.W, rbm.vBias, rbm.hBias, countGibbs, MODE_WITHOUT_COIN)
+
+    rnd_gibbs = theano.function([], T.concatenate([[sample], res]), updates=updates)
+
+    res, updates = rbm.bm.gibbs_all(m, rbm.W, rbm.vBias, rbm.hBias, countGibbs, MODE_WITHOUT_COIN)
+    data_gibbs = theano.function([m], T.concatenate([[m], res]), updates=updates)
+    print "Constructed Gibbs function: ", toc()
+    saveOutput = lambda x, name: \
+        saveImage( \
+            makeAnimImageFromMatrixImages( \
+                convertProbabilityTensorToImages(appearance, x)),
+            name)
+    print "Start Learn"
+    tic()
+    tic()
+    for idx in range(countIteration):
+        for iteration in range(len(data) / trainBlock + 1):
+            dataPrime = data[iteration * trainBlock: (iteration + 1) * trainBlock]
+            if len(dataPrime) > 0:
+                res = grad_func(dataPrime)
+                if idx % outputEveryIteration == 0:
+                    saveOutput(data_gibbs(dataPrime), 'data' + str(idx) + '_' + str(iteration))
+                    print idx, res, toc()
+                    tic()
+        if idx % outputEveryIteration == 0:
+            saveOutput(rnd_gibbs(), 'random' + str(idx) + '_' + str(iteration))
+            saveData(rbm.save(), str(idx) + '.txt')
+    toc()
+    print "learning time: ", toc()
+    saveData(rbm.save())
+
 
 def rbmTest(imageSize = 30, \
             NotDrawBackGround = False, \
@@ -16,7 +88,9 @@ def rbmTest(imageSize = 30, \
             secWidth = 1,
             learningMode = MODE_WITHOUT_COIN,
             numOutputRandom = 10,
-            regularization = 0, prefixName = ''):
+            regularization = 0,
+            prefixName = '',
+            dataFromOut = None):
     string = StringIO()
     string.write(prefixName)
     string.write('IS_'+str(imageSize))
@@ -29,15 +103,20 @@ def rbmTest(imageSize = 30, \
     string.write('_sW_'+str(secWidth))
     string.write('_r_'+str(regularization))
     setCurrentDirectory(string.getvalue())
-    SetGreyAsBlack()
-    if NotDrawBackGround:
-        SetDontDrawBlackContour()
+    if dataFromOut is None:
+        SetGreyAsBlack()
+        if NotDrawBackGround:
+            SetDontDrawBlackContour()
+        else:
+            SetDrawBlackContour()
+        SetSecWidth(secWidth)
+        dials = DrawDials(Tick(0, 0, 0), Tick(59, 0, 0),  imageSize)
+        appearance = dials[0]
+        dataPrime = [convertImageToVector(element) for element in dials]
     else:
-        SetDrawBlackContour()
-    SetSecWidth(secWidth)
-    dials = DrawDials(Tick(0, 0, 0), Tick(59, 0, 0),  imageSize)
-    appearance = dials[0]
-    dataPrime = [convertImageToVector(element) for element in dials]
+        dataPrime = dataFromOut
+        appearance = Image.new('F', size=(imageSize, imageSize))
+    # save(data)
     rbm = createSimpleRBM(hiddenVaribles, imageSize * imageSize)
     m = T.matrix()
     n = T.iscalar()
@@ -74,33 +153,39 @@ def rbmTest(imageSize = 30, \
             saveOutput(rnd_gibbs(), 'random' + str(idx))
             print idx, res, toc()
             tic()
+    toc()
     print "learning time: ", toc()
     saveData(rbm.save())
 
 # rbmTest(countIteration=3201, learningMode=MODE_WITH_COIN_EXCEPT_LAST, countGibbs=10, hiddenVaribles=400, prefixName='1')
+if __name__ == '__main__':
 
-countIterations = [3201]
-modes = [MODE_WITHOUT_COIN, MODE_WITH_COIN, MODE_WITH_COIN_EXCEPT_LAST, MODE_WITHOUT_COIN_EXCEPT_LAST]
-countGibbs = [2, 5, 10, 20, 40, 80]
-hidden = [50, 100, 200, 400, 600, 900]
-secWidth = [1, 2, 3]
-regularization = [0, 0.001, 0.01, 0.005]
-NotDrawBackGround = [False, True]
+    countIterations = [9601]
+    # MODE_WITHOUT_COIN, MODE_WITH_COIN, MODE_WITH_COIN_EXCEPT_LAST,
+    modes = [MODE_WITHOUT_COIN]#, MODE_WITH_COIN_EXCEPT_LAST]
+    countGibbs = [5]#[10, 20, 40]#[2, 5, 10, 20, 40, 80]
+    hidden = [200]#[50, 100, 200, 400]#, 600, 900]
+    secWidth = [1]#%, 2, 3]
+    regularization = [0.001, 0.01, 0.1, 0.05, 0.005]#, 0.005]
+    NotDrawBackGround = [False]#, True]
+    learningRates = [0.01, 0.1, 1]
 
-for ci in countIterations:
-    for cg in countGibbs:
-        for m in modes:
-            for h in hidden:
-                for sw in secWidth:
-                    for r in regularization:
-                        for ndbg in NotDrawBackGround:
-                            rbmTest(\
-                                countIteration=ci, \
-                                learningMode=m, \
-                                countGibbs=cg, \
-                                hiddenVaribles=h, \
-                                NotDrawBackGround=ndbg, \
-                                secWidth=sw, \
-                                regularization=r,\
-                                prefixName='2')
+    for ci in countIterations:
+        for cg in countGibbs:
+            for m in modes:
+                for h in hidden:
+                    for sw in secWidth:
+                        for r in regularization:
+                            for ndbg in NotDrawBackGround:
+                                for lr in learningRates:
+                                    rbmTest(\
+                                        countIteration=ci, \
+                                        learningMode=m, \
+                                        countGibbs=cg, \
+                                        hiddenVaribles=h, \
+                                        NotDrawBackGround=ndbg, \
+                                        secWidth=sw, \
+                                        regularization=r,\
+                                        learningRate=lr,\
+                                        prefixName='11')
 
