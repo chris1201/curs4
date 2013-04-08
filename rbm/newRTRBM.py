@@ -15,15 +15,16 @@ from theano.tensor.basic import TensorVariable
 
 MODE_WITHOUT_COIN = 0
 MODE_WITH_COIN = 1
-MODE_WITH_COIN_EXCEPT_LAST = 2
-MODE_WITHOUT_COIN_EXCEPT_LAST = 3
+MODE_WITHOUT_COIN_EXCEPT_V_COND_H = 2
+MODE_WITH_COIN_EXCEPT_LAST = 3
+MODE_WITHOUT_COIN_EXCEPT_LAST = 4
 
-MODE_NAMES = ['W', 'WO', 'WELast', 'WOELast']
+MODE_NAMES = ['W', 'WO', 'WONEW', 'WELast', 'WOELast']
 
 class BM:
     def __init__(self, theanoRnd):
         self.theanoRnd = theanoRnd
-        self.list_function_for_gibbs = [self.computeProbabilityVByHByV, self.samplingVByHByV];
+        self.list_function_for_gibbs = [self.computeProbabilityVByHByV, self.samplingVByHByV, self.computeVByHByV];
         
     def computeProbabilityHByV(self, sample, W, hBias):
         return T.nnet.sigmoid(T.dot(sample, W) + hBias)
@@ -33,6 +34,12 @@ class BM:
 
     def computeProbabilityVByHByV(self, sample, W, vBias, hBias):
         return self.computeProbabilityVByH(self.computeProbabilityHByV(sample, W, hBias), W, vBias)
+
+    def computeVByHByV(self, sample, W, vBias, hBias):
+        return self.generateRandomsFromBinoZeroOne(\
+            self.computeProbabilityVByH(\
+                self.computeProbabilityHByV(sample, W, hBias), W, vBias))
+
 
     def generateRandomsFromBinoZeroOne(self, probability, num = 1):
         return self.theanoRnd.binomial( \
@@ -47,7 +54,7 @@ class BM:
         return format[-1], updates
 
     def gibbs_all(self, sample, W, vBias, hBias, countSteps, function_mode):
-        if function_mode < 2:
+        if function_mode < 3:
             gibbsOne_format = lambda sample: self.list_function_for_gibbs[function_mode](sample, W, vBias, hBias);
             format, updates = theano.scan(fn=gibbsOne_format, \
                                           outputs_info=sample, \
@@ -84,6 +91,12 @@ class BM:
         else:
             sum_log = T.sum(log, axis=0)
         return -sum_log - xdotvbias
+
+    def cleverAddingToFreeEnergy(self, sample, W, vBias, hBias):
+        dream = self.computeProbabilityVByHByV(sample, W, vBias, hBias)
+        delta = dream - sample
+        result = T.sum(T.sum(T.sqr(delta)))
+        return result
 
     def addGradientToUpdate(self, update, gradVaribles, grad, learningRate):
         for u, v in zip(gradVaribles, grad):
@@ -180,16 +193,21 @@ class RBM:
                  T.mean(self.bm.freeEnergy(dream, self.W, self.vBias, self.hBias))
         return energy, update
 
-    def gradient(self, samples, countstep, function_mode):
+    def gradient(self, samples, countstep, function_mode, addingRegularization = 0.1):
         dream, update = self.gibbs(samples, countstep, function_mode)
-        energy = T.mean(self.bm.freeEnergy(samples, self.W, self.vBias, self.hBias)) - \
-                 T.mean(self.bm.freeEnergy(dream, self.W, self.vBias, self.hBias))
+        if addingRegularization != 0:
+            energy = T.mean(self.bm.freeEnergy(samples, self.W, self.vBias, self.hBias)) - \
+                     T.mean(self.bm.freeEnergy(dream, self.W, self.vBias, self.hBias)) + \
+                     addingRegularization * self.bm.cleverAddingToFreeEnergy(samples, self.W, self.vBias, self.hBias)
+        else:
+            energy = T.mean(self.bm.freeEnergy(samples, self.W, self.vBias, self.hBias)) - \
+                     T.mean(self.bm.freeEnergy(dream, self.W, self.vBias, self.hBias))
         gradBlock = [self.W, self.hBias, self.vBias]
         grad = theano.grad(energy, gradBlock, [samples, dream])
         return energy, grad, gradBlock, update
 
-    def grad_function(self, samples, countStep, function_mode, learning_rate, regularization = 0):
-        energy, grad, gradBlock, update = self.gradient(samples, countStep, function_mode)
+    def grad_function(self, samples, countStep, function_mode, learning_rate, regularization = 0, addingRegularization = 0.1):
+        energy, grad, gradBlock, update = self.gradient(samples, countStep, function_mode, addingRegularization)
         for u, v in zip(gradBlock, grad):
             update[u] = u - learning_rate * (v + u * regularization)
                                              #+ 0.421 * u)
@@ -202,6 +220,8 @@ class RBM:
             Varibles.append(countStep)
         if isinstance(learning_rate, TensorVariable):
             Varibles.append(learning_rate)
+        if isinstance(regularization, TensorVariable):
+            Varibles.append(regularization)
         return theano.function(Varibles, energy, updates=update)
 
 

@@ -7,6 +7,7 @@ from clocks import *
 from utils import *
 from tictoc import tic, toc
 from StringIO import StringIO
+import random
 
 def rbmGenerateClocks(imageSize = 30, NotDrawBackGround = False, secWidth = 1):
     SetGreyAsBlack()
@@ -21,24 +22,25 @@ def rbmGenerateClocks(imageSize = 30, NotDrawBackGround = False, secWidth = 1):
     return appearance, dataPrime
 
 def rbmStohasticGradientTest(countIteration = 2401,
-                             countGibbs = 10,
+                             countGibbs = 5,
                              learningRate = 0.01,
                              learningMode = MODE_WITHOUT_COIN,
                              outputEveryIteration = 100,
                              trainBlock = 100,
                              data = None,
                              regularization = 0,
-                             numOutputRandom = 5,
+                             numOutputRandom = 10,
                              hidden = 50,
-                             appearance = None):
+                             appearance = None, newReg = 0.01):
     rbm = createSimpleRBM(hidden, len(data[0]))
     m = T.matrix()
     n = T.iscalar()
     s = T.fscalar()
     v = T.vector()
+    reg = T.scalar()
     print "start create learning function", tic()
     grad_func = rbm.grad_function(m, countGibbs, learningMode, learningRate,
-                                  regularization + (len(data) - trainBlock) * 0.5 / len(data))
+                                  reg, newReg)
     print "learning function has been built: ", toc()
     print "start contruct gibbs function"
     tic()
@@ -61,11 +63,12 @@ def rbmStohasticGradientTest(countIteration = 2401,
     print "Start Learn"
     tic()
     tic()
+    random.shuffle(data)
     for idx in range(countIteration):
         for iteration in range(len(data) / trainBlock + 1):
             dataPrime = data[iteration * trainBlock: (iteration + 1) * trainBlock]
             if len(dataPrime) > 0:
-                res = grad_func(dataPrime)
+                res = grad_func(dataPrime, regularization + (len(data) - len(dataPrime)) * 0.00 / len(data))
                 if idx % outputEveryIteration == 0:
                     saveOutput(data_gibbs(dataPrime), 'data' + str(idx) + '_' + str(iteration))
                     print idx, res, toc()
@@ -160,15 +163,15 @@ def rbmTest(imageSize = 30, \
 # rbmTest(countIteration=3201, learningMode=MODE_WITH_COIN_EXCEPT_LAST, countGibbs=10, hiddenVaribles=400, prefixName='1')
 if __name__ == '__main__':
 
-    countIterations = [9601]
+    countIterations = [5000]
     # MODE_WITHOUT_COIN, MODE_WITH_COIN, MODE_WITH_COIN_EXCEPT_LAST,
     modes = [MODE_WITHOUT_COIN]#, MODE_WITH_COIN_EXCEPT_LAST]
     countGibbs = [5]#[10, 20, 40]#[2, 5, 10, 20, 40, 80]
-    hidden = [200]#[50, 100, 200, 400]#, 600, 900]
-    secWidth = [1]#%, 2, 3]
-    regularization = [0.001, 0.01, 0.1, 0.05, 0.005]#, 0.005]
+    hidden = [50]#[50, 100, 200, 400]#, 600, 900]
+    secWidth = [3]#%, 2, 3]
+    regularization = [0.001]#, 0.005]
     NotDrawBackGround = [False]#, True]
-    learningRates = [0.01, 0.1, 1]
+    learningRates = [0.01]
 
     for ci in countIterations:
         for cg in countGibbs:
@@ -187,5 +190,5 @@ if __name__ == '__main__':
                                         secWidth=sw, \
                                         regularization=r,\
                                         learningRate=lr,\
-                                        prefixName='11')
+                                        prefixName='2')
 
