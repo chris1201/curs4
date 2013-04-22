@@ -4,7 +4,7 @@ import StringIO
 import numpy
 import os
 import shutil
-from PIL import Image
+from PIL import Image, ImageDraw
 
 def convertImageToVector(image):
     return numpy.asarray(list(image.getdata()))
@@ -61,19 +61,40 @@ def makeAnimImageFromMatrixImages(data):
     count1 = len(data)
     count2 = len(data[0])
     size0 = data[0][0].size
-    size = (count2 * size0[0], count1 * size0[1])
+    size = (count2 * size0[0] + count2 - 1, count1 * size0[1] + count1)
     imag = Image.new(size=size, mode=data[0][0].mode)
     if imag.mode == 'P':
         imag.putpalette(data[0][0].getpalette())
     for idx1 in range(count1):
         for idx2 in range(count2):
             imag.paste(data[idx1][idx2], \
-                (idx2 * size0[0], idx1 * size0[1], \
-                 (idx2 + 1) * size0[0], (idx1 + 1) * size0[1]))
+                (idx2 * size0[0] + idx2, idx1 * size0[1] + idx1 + 1, \
+                 (idx2 + 1) * size0[0] + idx2, (idx1 + 1) * size0[1] + idx1 + 1))
+    dr = ImageDraw.Draw(imag)
+#    for idx1 in range(count1 - 1):
+    for idx1 in range(count1):
+        dr.line((0, idx1 * size0[1] + idx1, size[0], idx1 * size0[1] + idx1), 128)
+    for idx2 in range(1, count2):
+        dr.line((idx2 * size0[0] + idx2 - 1, 0, idx2 * size0[0] + idx2 - 1, size[1]), 128)
     return imag
 
 def saveImage(image, filename, ext='GIF'):
     image.save(ccd.currentDirectory + filename + '.' + ext, ext)
+
+def createFromWeightsImages(W, h1, h2, imageSize):
+    max = numpy.max(W)
+    min = numpy.min(W)
+    W = map(lambda x: map(lambda y: (y - min) / (max - min), x), W)
+    output = []
+    app = Image.new(mode='P', size=imageSize)
+    for idx1 in range(h1):
+        output.append([])
+        for idx2 in range(h2):
+            output[idx1].append(convertProbabilityVectorToImage(app, W[idx1 * h2 + idx2]))
+    return output
+
+def createFromWeightsImage(W, h1, h2, imageSize):
+    return makeAnimImageFromMatrixImages(createFromWeightsImages(W, h1, h2, imageSize))
 
 class ContainerCurrentDirectory:
     def __init__(self):

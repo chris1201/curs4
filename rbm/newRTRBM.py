@@ -47,7 +47,8 @@ class BM:
 
     def samplingVByHByV(self, sample, W, vBias, hBias):
         return self.generateRandomsFromBinoZeroOne(self.computeProbabilityVByH(\
-                self.generateRandomsFromBinoZeroOne(self.computeProbabilityHByV(sample, W, hBias)), W, vBias))
+                #self.generateRandomsFromBinoZeroOne
+                (self.computeProbabilityHByV(sample, W, hBias)), W, vBias))
 
     def gibbs(self, sample, W, vBias, hBias, countSteps, function_mode):
         format, updates = self.gibbs_all(sample, W, vBias, hBias, countSteps, function_mode)
@@ -97,6 +98,7 @@ class BM:
         delta = dream - sample
         result = T.sum(T.sum(T.sqr(delta)))
         return result
+
 
     def addGradientToUpdate(self, update, gradVaribles, grad, learningRate):
         for u, v in zip(gradVaribles, grad):
@@ -302,9 +304,9 @@ class RTRBM:
         return self.bm.saveTo(self.visible, self.hidden, [self.hBiasbase, self.vBiasbase, self.h_lid_0], [self.W, self.W1, self.W2])
 
     # if sample is matrix, gibbs thinks that it is matrix [Time, Visible]
-    def gibbs(self, sample, countStep, function_mode):
+    def gibbs(self, sample, countStep, function_mode, h_lid_type = 0):
         # templates of Varibles for calculate h_lid by previous value
-        calc_h_lid = lambda h_lid_old, sample: T.nnet.sigmoid(T.dot(sample, self.W) + self.hBiasbase)
+        calc_h_lid = lambda h_lid_old, sample: T.nnet.sigmoid(T.dot(sample, self.W) + self.hBiasbase) #+ T.dot(h_lid_old, self.W2.T)
         calc_hBiases = lambda h_lid: self.hBiasbase + T.dot(h_lid, self.W2.T)
         calc_vBiases = lambda h_lid: self.vBiasbase + T.dot(h_lid, self.W1.T)
         #   Parameter: countGibbsStep
@@ -313,7 +315,11 @@ class RTRBM:
                 vBias = calc_vBiases(h_lid)
                 hBias = calc_hBiases(h_lid)
                 res, updates = self.bm.gibbs(sample, self.W, vBias, hBias, countStep, function_mode)
-                return [res, calc_h_lid(start_h_lid, sample), vBias, hBias], updates
+                #res = res[-1]
+                if h_lid_type == 0:
+                    return [res, calc_h_lid(h_lid, sample), vBias, hBias], updates
+                else:
+                    return [res, calc_h_lid(h_lid, res), vBias, hBias], updates
             [sample_res, hLids, vBiases, hBiases], updates = theano.scan(gibbsSamplingForOneStepTime, sequences=sample, outputs_info=[None, start_h_lid, None, None])
             return sample_res, hLids, vBiases, hBiases, updates
         # usual gibbs-sampling
@@ -334,11 +340,18 @@ class RTRBM:
             hBiases = T.transpose(hBiases, (1, 0, 2))
             return res, hLids, updates, vBiases, hBiases
 
-    def gradient(self, sample, countStep, function_mode):
+    def gradient(self, sample, countStep, function_mode, regularization = 100):
         # GradientBlock = [energy, gradUByW1, gradUByW2, gradUByhBias, gradUByvBias, gradUByW, gradH_lid0]
         def GradientForOneObject(sample, dream, h_lids, vBias, hBias):
-            energy = self.bm.freeEnergy(sample, self.W, vBias, hBias) - self.bm.freeEnergy(dream, self.W, vBias, hBias)
-            # energy = T.sum(energy)
+            #T.sum(T.sqr(hBias - self.bm.computeProbabilityHByV(sample, self.W, hBias))) + \
+            #T.sum(T.sqr(vBias - sample)) +
+            #                     self.bm.cleverAddingToFreeEnergy(sample, self.W, vBias, hBias) +\
+            # self.bm.cleverAddingToFreeEnergy(sample, self.W, vBias, hBias) +
+            # self.bm.cleverAddingToFreeEnergy(sample, self.W, vBias, hBias) + \
+            energy = regularization * self.bm.cleverAddingToFreeEnergy(sample, self.W, vBias, hBias) + \
+                     self.bm.freeEnergy(sample, self.W, vBias, hBias) - self.bm.freeEnergy(dream, self.W, vBias, hBias)
+            #energy = self.bm.
+            #energy = T.sum(energy)
             grad = theano.grad(energy, [self.W, vBias, hBias], consider_constant=[sample, dream])
             gradUByW1 = T.outer(grad[1], h_lids);
             gradUByW2 = T.outer(grad[2], h_lids);
@@ -346,7 +359,7 @@ class RTRBM:
             gradUByvBias = (grad[1]);
             gradUByW = grad[0];
             gradHLid0 = (h_lids);
-            return [energy, gradUByW1, gradUByW2, gradUByhBias, gradUByvBias, gradUByW, gradHLid0]
+            return [energy, gradHLid0, gradUByW1, gradUByW2, gradUByhBias, gradUByvBias, gradUByW]
             # return [energy, grad[0], grad[1], grad[2], gradUByW1, gradUByW2, gradUByhBias]
 
         def GradientForOneTimeAutoGenerate(sample):
@@ -361,14 +374,14 @@ class RTRBM:
             meanQ = [T.mean(grad, axis=0) for grad in Q]
             return meanQ, updates
 
-        GradientBlock = [self.W1, self.W2, self.hBiasbase, self.vBiasbase, self.W, self.h_lid_0]
+        GradientBlock = [self.h_lid_0, self.W1, self.W2, self.hBiasbase, self.vBiasbase, self.W]
         output, updates = GradientForAllTime(sample);
-        output[-1] = self.h_lid_0 - output[-1]
-        return output[0], GradientBlock, output[1:], updates
+        #output[1] = output[1]
+        return output[0], GradientBlock[1:-1], output[2:-1], updates
 
-    def grad_function(self, countStep, learningRate, function_mode):
+    def grad_function(self, countStep, learningRate, function_mode, regularization = 100):
         samples = T.tensor3()
-        energy, gb, grad, upd = self.gradient(samples, countStep, function_mode)
+        energy, gb, grad, upd = self.gradient(samples, countStep, function_mode, regularization)
         self.bm.addGradientToUpdate(upd, gb, grad, learningRate)
         Varibles = [samples]
         if isinstance(countStep, TensorVariable):
@@ -376,3 +389,32 @@ class RTRBM:
         if isinstance(learningRate, TensorVariable):
             Varibles.append(learningRate)
         return theano.function(Varibles, energy, updates=upd)
+
+    def predict(self, sample, countImage, countStep, function_mode):
+        if len(sample.broadcastable) == 2:
+            shape = (countImage, self.visible)
+            random_images = self.bm.generateRandomsFromBinoZeroOne(T.ones(shape) * 0.5)
+            full_data = T.concatenate([sample, random_images])
+        else:
+            new_dim = T.cast(sample.shape[0], 'int32')
+            old_shape = sample.shape
+            shape = (countImage, new_dim, self.visible)
+            random_images = self.bm.generateRandomsFromBinoZeroOne(T.ones(shape) * 0.5)
+            sample = T.transpose(sample, (1, 0, 2))
+            full_data = T.concatenate([sample, random_images])
+            full_data = T.transpose(full_data, (1, 0, 2))
+        res, hLids, updates, vBiases, hBiases = self.gibbs(full_data, countStep, function_mode, 1)
+        return res, updates
+
+    def predict_function(self, istensor, countImage, countStep, function_mode):
+        if istensor:
+            sample = T.tensor3()
+        else:
+            sample = T.matrix()
+        a, b = self.predict(sample, countImage, countStep, function_mode)
+        Varibles = [sample]
+        if isinstance(countStep, TensorVariable):
+            Varibles.append(countStep)
+        if isinstance(countImage, TensorVariable):
+            Varibles.append(countImage)
+        return theano.function(Varibles, a, updates=b)

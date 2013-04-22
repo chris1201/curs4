@@ -29,7 +29,7 @@ def rbmStohasticGradientTest(countIteration = 2401,
                              trainBlock = 100,
                              data = None,
                              regularization = 0,
-                             numOutputRandom = 10,
+                             numOutputRandom = 20,
                              hidden = 50,
                              appearance = None, newReg = 0.01):
     rbm = createSimpleRBM(hidden, len(data[0]))
@@ -48,11 +48,11 @@ def rbmStohasticGradientTest(countIteration = 2401,
         T.reshape(
             T.repeat(T.ones_like(rbm.vBias) * 0.5, numOutputRandom),
             (numOutputRandom, len(data[0]))))
-    res, updates = rbm.bm.gibbs_all(sample, rbm.W, rbm.vBias, rbm.hBias, countGibbs, MODE_WITHOUT_COIN)
+    res, updates = rbm.bm.gibbs_all(sample, rbm.W, rbm.vBias, rbm.hBias, countGibbs + 1, learningMode)
 
     rnd_gibbs = theano.function([], T.concatenate([[sample], res]), updates=updates)
 
-    res, updates = rbm.bm.gibbs_all(m, rbm.W, rbm.vBias, rbm.hBias, countGibbs, MODE_WITHOUT_COIN)
+    res, updates = rbm.bm.gibbs_all(m, rbm.W, rbm.vBias, rbm.hBias, countGibbs + 1, learningMode)
     data_gibbs = theano.function([m], T.concatenate([[m], res]), updates=updates)
     print "Constructed Gibbs function: ", toc()
     saveOutput = lambda x, name: \
@@ -69,16 +69,17 @@ def rbmStohasticGradientTest(countIteration = 2401,
             dataPrime = data[iteration * trainBlock: (iteration + 1) * trainBlock]
             if len(dataPrime) > 0:
                 res = grad_func(dataPrime, regularization + (len(data) - len(dataPrime)) * 0.00 / len(data))
-                if idx % outputEveryIteration == 0:
-                    saveOutput(data_gibbs(dataPrime), 'data' + str(idx) + '_' + str(iteration))
-                    print idx, res, toc()
-                    tic()
         if idx % outputEveryIteration == 0:
+            print res, ' time: ', toc()
+            tic()
             saveOutput(rnd_gibbs(), 'random' + str(idx) + '_' + str(iteration))
             saveData(rbm.save(), str(idx) + '.txt')
+            saveOutput(data_gibbs(data), 'data' + str(idx) + '_' + str(iteration))
+
     toc()
     print "learning time: ", toc()
     saveData(rbm.save())
+    return rbm
 
 
 def rbmTest(imageSize = 30, \
