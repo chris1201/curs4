@@ -208,10 +208,10 @@ class RBM:
         grad = theano.grad(energy, gradBlock, [samples, dream])
         return energy, grad, gradBlock, update
 
-    def grad_function(self, samples, countStep, function_mode, learning_rate, regularization = 0, addingRegularization = 0.1):
+    def grad_function(self, samples, countStep, function_mode, learning_rate, regularization = 0, addingRegularization = 0.1, regL1 = 0):
         energy, grad, gradBlock, update = self.gradient(samples, countStep, function_mode, addingRegularization)
         for u, v in zip(gradBlock, grad):
-            update[u] = u - learning_rate * (v + u * regularization)
+            update[u] = u - learning_rate * (v + u * regularization + T.sgn(u) * regL1)
                                              #+ 0.421 * u)
                                              # 0.01239 * u)
                                              # 0.321 * u)

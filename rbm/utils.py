@@ -38,8 +38,8 @@ def saveData(strio, filename = 'data.txt'):
     file.close()
 
 # readData from data.txt
-def getStringData():
-    file = open(ccd.currentDirectory + 'data.txt', 'r')
+def getStringData(name='data.txt'):
+    file = open(ccd.currentDirectory + name, 'r')
     s = StringIO.StringIO()
     output = file.readlines()
     s.writelines(output)

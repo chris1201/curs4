@@ -9,12 +9,18 @@ ci = 30001
 cg = 10
 lr = 0.01
 tb = 10
-h = 64
+h1 = 7
+h = h1 * h1
 new_reg = 0.1
 reg = 0
-lm = MODE_WITHOUT_COIN_EXCEPT_LAST
+lm = MODE_WITHOUT_COIN
+rtrbm_ci = 30001
+elementLength = 2
+regregreg = 1
+stoh = 1
 # function_make_dir(30, True, ci, cg, lr, lm, h, 1, reg, tb, new_reg)
-setCurrentDirectory('2TwoParts10test_h64_g10_woel_plus_nr_100_by_all')
+setCurrentDirectory('TRUEci' + str(ci)+'cg'+str(cg)+'lr'+str(lr)+'tb'+\
+    str(tb) + 'h' + str(h) + 'nr' + str(new_reg) + 'lm' + 'woc' + 'rt' + str(rtrbm_ci) + 'nnr' + str(regregreg) + 'stoh' + str(stoh))
 
 dataPrime = []
 
@@ -28,6 +34,33 @@ for idx in range(10):
 
 app = image
 
+saveOutput = lambda x, name: \
+    saveImage( \
+        makeAnimImageFromMatrixImages( \
+            convertProbabilityTensorToImages(app, x)),
+        name)
+
+data = [dataPrime[idx:((idx + elementLength))] + (
+    [] if (idx + elementLength) / len(dataPrime) == 0 else dataPrime[:((idx + elementLength) % len(dataPrime))])
+        for idx in range(len(dataPrime))]
+
+#
+# rtrbm = OpenRTRBM(getStringData('rtrbm20000.txt'))
+# saveImage(createFromWeightsImage(theano.function([], rtrbm.W.T)(), 8, 8, (10, 10)), 'W_')
+# saveImage(createFromWeightsImage(theano.function([], rtrbm.W.T + rtrbm.vBiasbase)(), 8, 8, (10, 10)), 'W_bias')
+# saveImage(createFromWeightsImage(theano.function([], rtrbm.W)(), 10, 10, (8, 8)), 'WT')
+# saveImage(createFromWeightsImage(theano.function([], rtrbm.W + rtrbm.hBiasbase)(), 10, 10, (8, 8)), 'WT_')
+#
+# exit()
+# func = rtrbm.predict_function(True, 20, 10, MODE_WITHOUT_COIN)
+# saveOutput(func(data), '1')
+# elementLength = 1
+# data = [dataPrime[idx:((idx + elementLength))] + (
+#     [] if (idx + elementLength) / len(dataPrime) == 0 else dataPrime[:((idx + elementLength) % len(dataPrime))])
+#         for idx in range(len(dataPrime))]
+# saveOutput(func(data), '2')
+#
+# exit()
 
 rbm=rbmStohasticGradientTest(countGibbs = cg,
                              outputEveryIteration = 2000,
@@ -40,8 +73,8 @@ rbm=rbmStohasticGradientTest(countGibbs = cg,
                              regularization=reg,
                              newReg=new_reg,
                              learningRate=lr)
-#saveImage(createFromWeightsImage(theano.function([], rbm.W.T)(), 8, 8, (30, 30)), 'W')
-saveImage(createFromWeightsImage(theano.function([], rbm.W.T)(), 8, 8, (10, 10)), 'Wstart')
+saveImage(createFromWeightsImage(theano.function([], rbm.W)(), 10, 10, (h1, h1)), 'W')
+saveImage(createFromWeightsImage(theano.function([], rbm.W.T)(), h1, h1, (10, 10)), 'Wstart')
 
 dataPrime = []
 
@@ -61,10 +94,7 @@ rtrbm.vBiasbase = rbm.vBias
 rtrbm.hBiasbase = rbm.hBias
 rtrbm.W = rbm.W
 
-func = rtrbm.grad_function(10, 0.01, lm)
-
-rtrbm_ci = 20001
-elementLength = 2
+func = rtrbm.grad_function(1, 0.01, lm, regregreg)
 
 print 'construct_data'
 
@@ -78,19 +108,16 @@ funcSample5 = rtrbm.predict_function(True, 2, 5, MODE_WITHOUT_COIN)
 funcSample6 = rtrbm.predict_function(True, 2, 10, MODE_WITHOUT_COIN)
 
 
-saveOutput = lambda x, name: \
-    saveImage( \
-        makeAnimImageFromMatrixImages( \
-            convertProbabilityTensorToImages(app, x)),
-        name)
 #saveOutput(funcSample5(data), 'rtrbm0')
 saveOutput(data, 'rtrbm_data')
 tic()
 tic()
 for iter in range(rtrbm_ci):
-#    for inner_iter in range((len(data))):
-#        x = func([data[inner_iter]])
-    x = func(data)
+    if stoh:
+        for inner_iter in range((len(data))):
+            x = func([data[inner_iter]])
+    else:
+        x = func(data)
     if (iter % 1000 == 0):
         print 'output, x:', x, 'time', toc()
         tic()
@@ -101,7 +128,7 @@ for iter in range(rtrbm_ci):
 toc()
 print 'time', toc()
 
-saveImage(createFromWeightsImage(theano.function([], rtrbm.W.T)(), 8, 8, (10, 10)), 'W1')
+# saveImage(createFromWeightsImage(theano.function([], rtrbm.W.T)(), 6, 6, (10, 10)), 'W1')
 
 # print 'start part 2'
 

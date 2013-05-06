@@ -31,7 +31,7 @@ def rbmStohasticGradientTest(countIteration = 2401,
                              regularization = 0,
                              numOutputRandom = 20,
                              hidden = 50,
-                             appearance = None, newReg = 0.01):
+                             appearance = None, newReg = 0.01, regL1 = 0.01):
     rbm = createSimpleRBM(hidden, len(data[0]))
     m = T.matrix()
     n = T.iscalar()
@@ -40,7 +40,7 @@ def rbmStohasticGradientTest(countIteration = 2401,
     reg = T.scalar()
     print "start create learning function", tic()
     grad_func = rbm.grad_function(m, countGibbs, learningMode, learningRate,
-                                  reg, newReg)
+                                  reg, newReg, regL1)
     print "learning function has been built: ", toc()
     print "start contruct gibbs function"
     tic()
@@ -48,7 +48,7 @@ def rbmStohasticGradientTest(countIteration = 2401,
         T.reshape(
             T.repeat(T.ones_like(rbm.vBias) * 0.5, numOutputRandom),
             (numOutputRandom, len(data[0]))))
-    res, updates = rbm.bm.gibbs_all(sample, rbm.W, rbm.vBias, rbm.hBias, countGibbs + 1, learningMode)
+    res, updates = rbm.bm.gibbs_all(sample, rbm.W, rbm.vBias, rbm.hBias, countGibbs + 11, learningMode)
 
     rnd_gibbs = theano.function([], T.concatenate([[sample], res]), updates=updates)
 
