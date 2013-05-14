@@ -413,8 +413,25 @@ class RTRBM:
             sample = T.matrix()
         a, b = self.predict(sample, countImage, countStep, function_mode)
         Varibles = [sample]
-        if isinstance(countStep, TensorVariable):
-            Varibles.append(countStep)
         if isinstance(countImage, TensorVariable):
             Varibles.append(countImage)
+        if isinstance(countStep, TensorVariable):
+            Varibles.append(countStep)
+        return theano.function(Varibles, a, updates=b)
+
+    def predict0(self, countImage, countTime, countStep, function_mode):
+        shape = (countTime, countImage, self.visible)
+        random_images = self.bm.generateRandomsFromBinoZeroOne(T.ones(shape) * 0.5)
+        res, hLids, updates, vBiases, hBiases = self.gibbs(random_images, countStep, function_mode, 1)
+        return res, updates
+
+    def predict0_function(self, countImage, countTime, countStep, function_mode):
+        a, b = self.predict0(countImage, countTime, countStep, function_mode)
+        Varibles = []
+        if isinstance(countImage, TensorVariable):
+            Varibles.append(countImage)
+        if isinstance(countTime, TensorVariable):
+            Varibles.append(countTime)
+        if isinstance(countStep, TensorVariable):
+            Varibles.append(countStep)
         return theano.function(Varibles, a, updates=b)
