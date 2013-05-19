@@ -1,12 +1,14 @@
 __author__ = 'gavr'
 
-from theano.gof.python25 import OrderedDict
-import theano.updates
+
 import numpy
+import numpy.distutils.__config__
 from math import sqrt
 import theano
 import theano.tensor as T
+from theano.gof.python25 import OrderedDict
 import StringIO
+import theano.updates
 import re
 from numpy.oldnumeric.random_array import random_integers
 from theano.tensor.shared_randomstreams import RandomStreams
@@ -76,11 +78,11 @@ class BM:
                 format, updates = theano.scan(fn=gibbsOne_format, \
                                               outputs_info=sample, \
                                               n_steps=countSteps - 1)
-                gibbsOne_format = lambda sample: self.list_function_for_gibbs[MODE_WITH_COIN](sample, W, vBias, hBias);
+                gibbsOne_format = \
+                        lambda sample: self.list_function_for_gibbs[MODE_WITHOUT_COIN_EXCEPT_V_COND_H](sample, W, vBias, hBias);
                 res = gibbsOne_format(format[-1])
                 res = T.concatenate([format, [res]])
                 return res, updates
-
 
     def freeEnergy(self, sample, W, vBias, hBias):
         xdotw_plus_bias = T.dot(sample, W) + hBias
@@ -208,6 +210,26 @@ class RBM:
         grad = theano.grad(energy, gradBlock, [samples, dream])
         return energy, grad, gradBlock, update
 
+    def gradient2(self, samples):
+        error = self.bm.cleverAddingToFreeEnergy(samples, self.W, self.vBias, self.hBias)
+        gradBlock = [self.W, self.hBias, self.vBias]
+        grad = theano.grad(error, gradBlock, [samples])
+        return error, grad, gradBlock
+    
+    def grad2_function(self, samples, learning_rate, regL2, regL1):
+        energy, grad, gradBlock = self.gradient2(samples)
+        update = OrderedDict()
+        for u, v in zip(gradBlock, grad):
+            update[u] = u - learning_rate * (v + u * regL2 + T.sgn(u) * regL1)
+        Varibles = [samples]
+        if isinstance(learning_rate, TensorVariable):
+            Varibles.append(learning_rate)
+        if isinstance(regL2, TensorVariable):
+            Varibles.append(regL2)
+        if isinstance(regL1, TensorVariable):
+            Varibles.append(regL1)
+        return theano.function(Varibles, energy, updates=update)
+    
     def grad_function(self, samples, countStep, function_mode, learning_rate, regularization = 0, addingRegularization = 0.1, regL1 = 0):
         energy, grad, gradBlock, update = self.gradient(samples, countStep, function_mode, addingRegularization)
         for u, v in zip(gradBlock, grad):
@@ -226,7 +248,14 @@ class RBM:
             Varibles.append(regularization)
         return theano.function(Varibles, energy, updates=update)
 
-
+    def step_function(self, samples, countStep, function_mode, learning_rate, reg, addReg, regL1):
+        e, grad, gradB, update = self.gradient(samples, countStep, function_mode, addReg)
+        eps = T.fscalar()
+        vec = []
+        for u, v in zip(gradB, grad):
+            vec.append(u - eps * (v + u * reg + T.sgn(u) * regL1))
+        return theano.function([samples, eps], T.sum(self.bm.freeEnergy(samples, vec[0], vec[2], vec[1])), updates=update)
+            
 def OpenRTRBM(string):
     array = string.split('\n')
     parse_vector = lambda str: map(float, str.split(','))

@@ -1,5 +1,5 @@
 from images2gif import writeGif
-from PIL import Image, ImageSequence, ImageDraw, ImagePalette
+import Image, ImageSequence, ImageDraw, ImagePalette
 from math import pi, sin, cos
 
 class clockInfo:

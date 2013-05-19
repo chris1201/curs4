@@ -1,7 +1,8 @@
-from appindicator._appindicator import app_indicator_get_type
+# from appindicator._appindicator import app_indicator_get_type
 
 __author__ = 'gavr'
 
+import numpy.distutils.__config__
 from newRTRBM import *
 from clocks import *
 from utils import *

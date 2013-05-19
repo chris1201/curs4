@@ -4,7 +4,7 @@ import StringIO
 import numpy
 import os
 import shutil
-from PIL import Image, ImageDraw
+import Image, ImageDraw
 
 def convertImageToVector(image):
     return numpy.asarray(list(image.getdata()))

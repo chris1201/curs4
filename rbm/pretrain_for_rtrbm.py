@@ -1,5 +1,6 @@
 __author__ = 'gavr'
 
+import numpy.distutils.__config__
 from rbmTest import *
 from StringIO import StringIO
 from tictoc import tic, toc
@@ -22,24 +23,26 @@ def function_make_dir(imsize, bkg, ci, cg, lr, lm, h, sW, r, tb, nreg):
     setCurrentDirectory(string.getvalue())
 
 
-ci = 50001
+ci = 1001
 cg = 10
 lr = 0.01
-tb = 59
-h1 = 11
+tb = 4
+h1 = 16
 h = h1 * h1
-new_reg = 0.02
-reg = 0
-lm = MODE_WITHOUT_COIN
+new_reg = 1
+reg = 0.001
+#lm = MODE_WITHOUT_COIN
+#lm = MODE_WITHOUT_COIN_EXCEPT_V_COND_H
+lm = MODE_WITHOUT_COIN_EXCEPT_LAST
 # function_make_dir(30, True, ci, cg, lr, lm, h, 1, reg, tb, new_reg)
-setCurrentDirectory('86') # 67 --l1 = 0.05, 68 ---0.1, 69 --- 0.005, 70 - 0.001, 71 - 0.0005, 72 --- 50000Iter,
+setCurrentDirectory('100') # 67 --l1 = 0.05, 68 ---0.1, 69 --- 0.005, 70 - 0.001, 71 - 0.0005, 72 --- 50000Iter,
 #  73-hidden 10, 74 --- hidden 36, 75 --- 0.005, 76 --- 10, 83 - stoh. 84 = full gradient
 # 85 - 256. 86 - 121
-trainRBM = 2
+trainRBM = 1
 if trainRBM == 1:
     app, data = rbmGenerateClocks(30)
     rbm=rbmStohasticGradientTest(countGibbs = cg,
-                             outputEveryIteration = 5000,
+                             outputEveryIteration = 50,
                              countIteration=ci,
                              data=data,
                              appearance=app,

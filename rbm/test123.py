@@ -3,7 +3,7 @@ __author__ = 'gavr'
 from rbmTest import *
 from StringIO import StringIO
 from tictoc import tic, toc
-from PIL import Image
+import Image
 
 ci = 30001
 cg = 10
