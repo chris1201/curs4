@@ -419,6 +419,32 @@ class RTRBM:
             Varibles.append(learningRate)
         return theano.function(Varibles, energy, updates=upd)
 
+    def gradient2(self, sample):
+        def GradientForOneTimeAutoGenerate(sample):
+            dream, h_lids, update, vBiases, hBiases = self.gibbs(sample, 1, MODE_WITHOUT_COIN)
+            func = T.sum(T.sum(T.sqr(dream - sample)))
+            gradBlock = [self.W, self.vBiasbase, self.hBiasbase, self.W1, self.W2]
+            grad = theano.grad(func, gradBlock, consider_constant=[sample])
+            return [func, grad[0], grad[1], grad[2], grad[3], grad[4]], update
+
+        def GradientForAllTime(samples):
+            Q, updates = theano.scan(GradientForOneTimeAutoGenerate, sequences=samples)
+            meanQ = [T.mean(grad, axis=0) for grad in Q]
+            return meanQ, updates
+        
+        gradBlock = [self.W, self.vBiasbase, self.hBiasbase, self.W1, self.W2]
+        output, updates = GradientForAllTime(sample)
+        return output[0], gradBlock, output[1:-1], updates 
+
+    def grad2_function(self, learning_rate):
+        samples = T.tensor3()
+        energy, gb, grad, upd = self.gradient2(samples)
+        self.bm.addGradientToUpdate(upd, gb, grad, learning_rate)
+        Varibles = [samples]
+        if isinstance(learning_rate, TensorVariable):
+            Varibles.append(learning_rate)
+        return theano.function(Varibles, energy, updates=upd)
+
     def predict(self, sample, countImage, countStep, function_mode):
         if len(sample.broadcastable) == 2:
             shape = (countImage, self.visible)

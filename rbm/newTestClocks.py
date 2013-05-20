@@ -3,9 +3,14 @@ from utils import *
 from rbmTest import *
 import matplotlib.pyplot as plt
 
-def test(hidden, l1, l2):
+def test(hidden, l1, l2, widthsLines = [1]):
     rbm = createSimpleRBM(hidden * hidden, 900)
-    app, data = rbmGenerateClocks(30)
+    # constuct data for multiple clocks
+    data = []
+    for width in widthsLines:
+        app, data1 = rbmGenerateClocks(30, width)
+        for x in data1: 
+            data.append(x)
     func2 = rbm.grad2_function(T.matrix(), 0.001, 0, 0)
     func1 = rbm.grad_function(T.matrix(), 10, MODE_WITHOUT_COIN, 0.01, l2, 0, l1)
 
@@ -53,3 +58,6 @@ def test(hidden, l1, l2):
     plt.savefig(ccd.currentDirectory + 'progress.png')
     saveData(rbm.save())
     saveImage(createFromWeightsImage(theano.function([], T.dot(rbm.W, rbm.W.T))(), 30, 30, (30, 30)), 'wwt')
+
+def testRTRBM(hidden, l1, l2, widthLines = [1]):
+    
